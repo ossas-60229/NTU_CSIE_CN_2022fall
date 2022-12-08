@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
             if (ack_sure < 0) {
                 sscanf(now_seg.data, "%d %d", &height, &width);
                 printf("height is %d, width is %d\n", height, width);
-                printf("fuck you\n");
+                exit(0);
             }
             if (now_seg.header.seqNumber == ack_sure + 1) {
                 unsigned long checksum = get_checksum(now_seg.data);
