@@ -12,6 +12,7 @@ SENDER_EXEC = sender
 RECVER_EXEC = receiver
 OPENCV_EXEC = openCV
 PLAYER_EXEC = player
+FRAME_TMP = frame*.seg
 
 INCLUDE_OPENCV = `pkg-config --cflags --libs opencv4`
 all: agent crc32 sender receiver openCV
@@ -45,4 +46,4 @@ killport:
 
 clean:
 	rm $(AGENT_EXEC) $(CRC32_EXEC) $(SENDER_EXEC) $(RECVER_EXEC) $(OPENCV_EXEC)
-	rm frame*.mpg
+	rm $(FRAME_TMP)
