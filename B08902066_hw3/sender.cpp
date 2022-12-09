@@ -24,6 +24,7 @@ unsigned long get_checksum(char *str) {
 void getshit(LIST &lit, Mat &tmp_frame, int &seq) {
     if (tmp_frame.empty()) {
         SEGMENT *tmp_seg = (SEGMENT *)malloc(sizeof(SEGMENT));
+        initSEG(*tmp_seg);
         tmp_seg->header.fin = 1;
         empback(lit, *tmp_seg);
         read_final = 1;
@@ -36,6 +37,7 @@ void getshit(LIST &lit, Mat &tmp_frame, int &seq) {
     int rest = imgSize;
     while (rest > 0) {
         SEGMENT *tmp_seg = (SEGMENT *)malloc(sizeof(SEGMENT));
+        initSEG(*tmp_seg);
         int set = buff_size;
         if (rest < set) set = rest;
         tmp_seg->header.seqNumber = seq++;
