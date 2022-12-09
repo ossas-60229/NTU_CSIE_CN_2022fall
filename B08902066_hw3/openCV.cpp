@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
         client_img = client_img.clone();
     }
 
-    while (1) {
+    while (!feof(fp)) {
         // Get a frame from the video to the container of the server.
         // Get the size of a frame in bytes
         int imgSize = server_img.total() * server_img.elemSize();
@@ -58,8 +58,7 @@ int main(int argc, char *argv[]) {
         char c = (char)waitKey(1000);
         if (c == 27) break;
     }
-
-    cap.release();
+    fclose(fp);
     destroyAllWindows();
     return 0;
 }

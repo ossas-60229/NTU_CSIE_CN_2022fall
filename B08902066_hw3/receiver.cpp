@@ -1,7 +1,9 @@
 #include "GBN.hpp"
 #include "opencv2/opencv.hpp"
 using namespace cv;
-SEGMENT buffer_pkt[256];
+#define buff_size 256
+#define SEG_SIZE 1000
+SEGMENT buffer_pkt[buff_size];
 int frame_number = 0;
 const char *player_exec = "./openCV";
 
@@ -24,24 +26,37 @@ unsigned long get_checksum(char *str) {
     unsigned long checksum = crc32(0L, (const Bytef *)data, 1000);
     return checksum;
 }
-void flush_vid(SEGMENT *buffer, int index) {
-    return;
-    char frame_name[100];
-    sprintf(frame_name, "frame%d.mpg", frame_number++);
-    FILE *fp = fopen(frame_name, "w");
-    for (int i = 0; i < index; i++) {
-        fwrite(buffer[i].data, 1, buffer[i].header.length, fp);
+int min(int a, int b) { return (a < b) ? a : b; }
+int flush_vid(SEGMENT *buffer, int index, int width, int height) {
+    Mat tmp = Mat::zeros(height, width, CV8UC3);
+    int imgSize = tmp.elemSize() * tmp.total(), now = 0;
+    int frnumber = index * SEG_SIZE / imgSize;
+    while (1) {
+        uchar tmp_buffer[imgSize];
+        int rest = imgSize;
+        while (rest != 0) {
+            if (frnumber-- <= 0) break;
+            uchar *p = buffer_pkt[now].data;
+            int set = min(rest, buffer_pkt[now].header.length);
+            memcpy(&tmp_buffer[imgSize - rest], p, set);
+            rest -= set;
+            buffer_pkt[now].header.length -= set;
+            if (buffer_pkt[now].header.length > rest) {
+                char buf[SEG_SIZE];
+                memcpy(buf, &buffer_pkt[now].data[set],
+                       buffer_pkt[now].header.length);
+                memset(buffer_pkt[now].data, 0, buff_size);
+                memcpy(buffer_pkt[now].data, buf,
+                       buffer_pkt[now].header.length);
+            } else {
+                now++;
+            }
+        }
+        memcpy(tmp.data, tmp_buffer, imgSize);
+        imgshow("fuck", tmp);
     }
-    pid_t pid = fork();
-    if (pid == 0) {
-        execlp(player_exec, player_exec, frame_name, NULL);
-    } else {
-        int status;
-        waitpid(pid, &status, 0);
-    }
-    return;
+    return now;
 }
-
 int main(int argc, char *argv[]) {
     if (argc != 3)
         ERR_EXIT("usage: ./receiver <receiver port> <agent IP>:<agent port>");
