@@ -141,10 +141,8 @@ int main(int argc, char *argv[]) {
                         fprintf(stderr, "recv\tdata\t#%d\n",
                                 now_seg.header.seqNumber);
                         if (now_seg.header.seqNumber > 0) {
-                            buffer_pkt[index].header.length =
-                                now_seg.header.length;
-                            memcpy(buffer_pkt[index++].data, now_seg.data,
-                                   1000);
+                            memcpy(&buffer_pkt[index++], &now_seg,
+                                   sizeof(SEGMENT));
                         }
                         ack_sure++;
                     } else {
