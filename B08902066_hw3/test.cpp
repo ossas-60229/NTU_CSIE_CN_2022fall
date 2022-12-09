@@ -13,19 +13,14 @@ int main() {
     if (!tmp_frame.isContinuous()) {
         tmp_frame = tmp_frame.clone();
     }
-    FILE *fp = fopen("fuck.mpg", "w");
     int imgSize = tmp_frame.elemSize() * tmp_frame.total();
     printf("width: %d, height: %d imgsize: %d\n", width, height, imgSize);
+    int number = 0;
     while (1) {
         cap >> tmp_frame;
         if (tmp_frame.empty()) break;
-        uchar buf[imgSize];
-        memcpy(buf, tmp_frame.data, imgSize);
-        fwrite(buf, sizeof(uchar), imgSize, fp);
-        fflush(fp);
-        char c = waitKey(33.3);
+        printf("%d\n", number++);
     }
-    fclose(fp);
     cap.release();
 
     return 0;
