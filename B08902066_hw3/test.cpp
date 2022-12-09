@@ -18,7 +18,7 @@ int main() {
     printf("width: %d, height: %d imgsize: %d\n", width, height, imgSize);
     int number = 0;
     const char* file_name = "fuckyou.txt";
-    mkfifo(file_name);
+    mkfifo(file_name, 0777);
     pid_t pid = fork();
     char w[50], h[50];
     sprintf(w, "%d", width);
