@@ -41,7 +41,6 @@ int main(int argc, char *argv[]) {
         // world of the Internet)
         uchar buffer[imgSize];
         fread(buffer, sizeof(uchar), imgSize, fp);
-        fprintf(stderr, "%d\n", imgSize);
         // Allocate container to load frames
         // Copy a frame to the buffer
 

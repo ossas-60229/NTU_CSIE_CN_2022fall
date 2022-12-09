@@ -3,6 +3,7 @@
 using namespace std;
 using namespace cv;
 
+const char* player_exec = "./openCV";
 int main() {
     VideoCapture cap("video.mpg");
 
@@ -16,11 +17,27 @@ int main() {
     int imgSize = tmp_frame.elemSize() * tmp_frame.total();
     printf("width: %d, height: %d imgsize: %d\n", width, height, imgSize);
     int number = 0;
+    const char* file_name = "fuckyou.txt";
+    mkfifo(file_name);
+    pid_t pid = fork();
+    char w[50], h[50];
+    sprintf(w, "%d", width);
+    sprintf(h, "%d", height);
+
+    if (pid == 0) {
+        execlp(player_exec, player_exec, file_name, w, h, NULL);
+    }
+    FILE* fp = fopen(file_name, "w+");
     while (1) {
         cap >> tmp_frame;
         if (tmp_frame.empty()) break;
-        printf("%d\n", number++);
+        uchar buffer[imgSize];
+        uchar* p = tmp_frame.data;
+        memcpy(buffer, p, imgSize);
+        fwrite(buffer, sizeof(uchar), imgSize, fp);
+        fflush(fp);
     }
+    fclose(fp);
     cap.release();
 
     return 0;
