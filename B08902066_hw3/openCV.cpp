@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
     // Get the resolution of the video
     int width = atoi(argv[2]);
     int height = atoi(argv[3]);
-
+    fprintf(stderr, "width is %d, height is %d\n");
     // Allocate container to load frames
     server_img = Mat::zeros(height, width, CV_8UC3);
     client_img = Mat::zeros(height, width, CV_8UC3);
@@ -30,16 +30,18 @@ int main(int argc, char *argv[]) {
     if (!client_img.isContinuous()) {
         client_img = client_img.clone();
     }
+    int imgSize = server_img.total() * server_img.elemSize();
 
     while (!feof(fp)) {
         // Get a frame from the video to the container of the server.
         // Get the size of a frame in bytes
-        int imgSize = server_img.total() * server_img.elemSize();
 
         // Allocate a buffer to load the frame (there would be 2 buffers in the
         // world of the Internet)
         uchar buffer[imgSize];
-        fread(buffer, imgSize, 1, fp);
+        fread(buffer, sizeof(uchar), imgSize, fp);
+        fprintf(stderr, "%d\n", imgSize);
+        // Allocate container to load frames
         // Copy a frame to the buffer
         memcpy(buffer, server_img.data, imgSize);
 
@@ -55,7 +57,7 @@ int main(int argc, char *argv[]) {
         // Notice: this part is necessary due to openCV's design.
         // waitKey function means a delay to get the next frame. You can change
         // the value of delay to see what will happen
-        char c = (char)waitKey(1000);
+        char c = (char)waitKey(30);
         if (c == 27) break;
     }
     fclose(fp);

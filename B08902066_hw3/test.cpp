@@ -13,15 +13,18 @@ int main() {
     int width = cap.get(CAP_PROP_FRAME_WIDTH);
     int height = cap.get(CAP_PROP_FRAME_HEIGHT);
     Mat tmp_frame = Mat::zeros(height, width, CV_8UC3);
+    if (!tmp_frame.isContinuous()) {
+        tmp_frame = tmp_frame.clone;
+    }
     FILE *fp = fopen("fuck.mpg", "w");
-    printf("width: %d, height: %d\n", width, height);
+    int imgSize = tmp_frame.elemSize() * tmp_frame.total();
+    printf("width: %d, height: %d imgsize: %d\n", width, height, imgSize);
     while (1) {
         cap >> tmp_frame;
-        int imgSize = tmp_frame.elemSize() * tmp_frame.total();
         if (tmp_frame.empty()) break;
         uchar buf[imgSize];
         memcpy(buf, tmp_frame.data, imgSize);
-        fwrite(buf, imgSize, 1, fp);
+        fwrite(buf, sizeof(uchar), imgSize, fp);
         fflush(fp);
     }
     fclose(fp);
