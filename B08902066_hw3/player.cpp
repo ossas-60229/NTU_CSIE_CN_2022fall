@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
         memcpy(iptr, buffer, imgSize);
 
         // show the frame
-        imshow("Video", tmp_img.data);
+        imshow("Video", tmp_img);
 
         // Press ESC on keyboard to exit
         // Notice: this part is necessary due to openCV's design.
