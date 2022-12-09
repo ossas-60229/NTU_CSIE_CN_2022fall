@@ -20,14 +20,15 @@ int main() {
     const char* file_name = "fuckyou.fifo";
     const char* wait_name = "wait.fifo";
     mkfifo(file_name, 0777);
-    mkfifo(wait_name, 0777);
     pid_t pid = fork();
-    char w[50], h[50];
-    sprintf(w, "%d", width);
-    sprintf(h, "%d", height);
-
+    FILE* fp;
     if (pid == 0) {
+        char w[50], h[50];
+        sprintf(w, "%d", width);
+        sprintf(h, "%d", height);
         execlp(player_exec, player_exec, file_name, w, h, NULL);
+    } else {
+        fp = fopen(file_name, "w");
     }
     while (1) {
         cap >> tmp_frame;
