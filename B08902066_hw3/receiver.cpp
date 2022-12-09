@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
             if (now_seg.header.seqNumber == ack_sure + 1) {
                 unsigned long checksum = get_checksum(now_seg.data);
                 if (checksum == now_seg.header.checksum) {
-                    if (index < 256) {
+                    if (index < buff_size) {
                         fprintf(stderr, "recv\tdata\t#%d\n",
                                 now_seg.header.seqNumber);
                         if (now_seg.header.seqNumber > 0) {
