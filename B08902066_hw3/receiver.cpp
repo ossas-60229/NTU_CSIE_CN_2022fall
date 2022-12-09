@@ -21,6 +21,7 @@ void init_player(int width, int height) {
         execlp(player_exec, player_exec, fifo_name, w, h, NULL);
     } else {
         fp = fopen(fifo_name, "w");
+        sleep(1);
     }
     return;
 }
