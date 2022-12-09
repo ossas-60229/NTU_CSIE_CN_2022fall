@@ -5,11 +5,13 @@ CRC32_SRC = crc32.cpp
 SENDER_SRC = sender.cpp
 RECVER_SRC = receiver.cpp
 OPENCV_SRC = openCV.cpp
+PLAYER_SRC = palyer.cpp
 AGENT_EXEC = agent
 CRC32_EXEC = crc32
 SENDER_EXEC = sender
 RECVER_EXEC = receiver
 OPENCV_EXEC = openCV
+PLAYER_EXEC = player
 
 INCLUDE_OPENCV = `pkg-config --cflags --libs opencv4`
 all: agent crc32 sender receiver openCV
@@ -24,6 +26,8 @@ receiver:
 	$(CC) $(RECVER_SRC) -lz -o $(RECVER_EXEC) $(INCLUDE_OPENCV)
 openCV:
 	$(CC) $(OPENCV_SRC) -lz -o $(OPENCV_EXEC) $(INCLUDE_OPENCV)
+player:
+	$(CC) $(PLAYER_SRC) -lz -o $(PLAYER_EXEC) $(INCLUDE_OPENCV)
 TCPP:
 	$(CC) test.cpp -lz -o test $(INCLUDE_OPENCV)
 testagent:

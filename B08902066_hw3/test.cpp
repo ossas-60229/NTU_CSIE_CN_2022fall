@@ -23,8 +23,10 @@ int main() {
         memcpy(buf, tmp_frame.data, imgSize);
         fwrite(buf, sizeof(uchar), imgSize, fp);
         fflush(fp);
+        char c = waitKey(33.3);
     }
     fclose(fp);
+    cap.release();
 
     return 0;
 }

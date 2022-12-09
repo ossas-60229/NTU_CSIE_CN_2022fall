@@ -11,6 +11,7 @@ int main(int argc, char *argv[]) {
     Mat server_img, client_img;
     if (argc != 4) {
         fprintf(stderr, "argument error");
+        exit(0);
     }
     FILE *fp = fopen(argv[1], "r");
 

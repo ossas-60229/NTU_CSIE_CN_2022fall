@@ -49,17 +49,18 @@ int main(int argc, char *argv[]) {
 
         // Here, we assume that the buffer is transmitted from the server to the
         // client Copy a frame from the buffer to the container of the client
-        uchar *iptr = client_img.data;
+        Mat tmp_img = Mat::zeros(height, width, CV_8UC3);
+        uchar *iptr = tmp_img.data;
         memcpy(iptr, buffer, imgSize);
 
         // show the frame
-        imshow("Video", client_img);
+        imshow("Video", tmp_img.data);
 
         // Press ESC on keyboard to exit
         // Notice: this part is necessary due to openCV's design.
         // waitKey function means a delay to get the next frame. You can change
         // the value of delay to see what will happen
-        char c = (char)waitKey(1000);
+        char c = (char)waitKey(33.3);
         if (c == 27) break;
     }
 
