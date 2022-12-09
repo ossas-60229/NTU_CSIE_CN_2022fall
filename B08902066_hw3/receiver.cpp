@@ -36,7 +36,6 @@ void setIP(char *dst, const char *src);
 void corruptData(char *data, int len);
 unsigned long get_checksum(char *str);
 int min(int a, int b) { return (a < b) ? a : b; }
-pid_t pid = -1;
 int main(int argc, char *argv[]) {
     if (argc != 3)
         ERR_EXIT("usage: ./receiver <receiver port> <agent IP>:<agent port>");
