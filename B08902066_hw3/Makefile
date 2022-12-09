@@ -12,7 +12,7 @@ SENDER_EXEC = sender
 RECVER_EXEC = receiver
 OPENCV_EXEC = openCV
 PLAYER_EXEC = player
-FRAME_TMP = frame*.seg
+FIFO_FILE = *.fifo
 
 INCLUDE_OPENCV = `pkg-config --cflags --libs opencv4`
 all: agent crc32 sender receiver openCV
@@ -32,7 +32,7 @@ player:
 TCPP:
 	$(CC) test.cpp -lz -o test $(INCLUDE_OPENCV)
 testagent:
-	./agent 1234 local:1235 local:1236 0
+	./agent 1234 local:1235 local:1236 0.3
 testsend:
 	./sender 1235 local:1234 video.mpg
 testrecv:
@@ -45,5 +45,4 @@ killport:
 .PHONY: clean
 
 clean:
-	rm $(AGENT_EXEC) $(CRC32_EXEC) $(SENDER_EXEC) $(RECVER_EXEC) $(OPENCV_EXEC)
-	rm $(FRAME_TMP)
+	rm $(AGENT_EXEC) $(CRC32_EXEC) $(SENDER_EXEC) $(RECVER_EXEC) $(OPENCV_EXEC) $(FIFO_FILE)

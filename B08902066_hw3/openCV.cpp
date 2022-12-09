@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
         // Notice: this part is necessary due to openCV's design.
         // waitKey function means a delay to get the next frame. You can change
         // the value of delay to see what will happen
-        char c = (char)waitKey(100);
+        char c = (char)waitKey(1000);
         if (c == 27) break;
     }
     fclose(fp);
