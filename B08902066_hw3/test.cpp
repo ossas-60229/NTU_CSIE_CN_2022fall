@@ -18,6 +18,7 @@ int main() {
     printf("width: %d, height: %d imgsize: %d\n", width, height, imgSize);
     int number = 0;
     const char* file_name = "fuckyou.txt";
+    remove(file_name);
     mkfifo(file_name, 0777);
     pid_t pid = fork();
     char w[50], h[50];
@@ -28,6 +29,7 @@ int main() {
         execlp(player_exec, player_exec, file_name, w, h, NULL);
     }
     FILE* fp = fopen(file_name, "w+");
+    fprintf(stderr, "start loop");
     while (1) {
         cap >> tmp_frame;
         if (tmp_frame.empty()) break;

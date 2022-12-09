@@ -11,7 +11,6 @@ FILE *fp;
 pid_t pid = -1;
 
 void init_player(int width, int height) {
-    fprintf(stderr, "start init\n");
     char w[50], h[50];
     sprintf(w, "%d", width);
     sprintf(h, "%d", height);
@@ -19,6 +18,7 @@ void init_player(int width, int height) {
     fp = fopen(fifo_name, "w");
     pid = fork();
     if (pid == 0) {
+        fprintf(stderr, "start execlp\n");
         execlp(player_exec, player_exec, fifo_name, w, h, NULL);
     }
     fprintf(stderr, "start init\n");
