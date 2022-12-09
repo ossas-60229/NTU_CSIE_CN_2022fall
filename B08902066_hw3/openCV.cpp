@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
     // Get the resolution of the video
     int width = atoi(argv[2]);
     int height = atoi(argv[3]);
-    fprintf(stderr, "width is %d, height is %d\n");
+    fprintf(stderr, "width is %d, height is %d\n", width, height);
     // Allocate container to load frames
     server_img = Mat::zeros(height, width, CV_8UC3);
     client_img = Mat::zeros(height, width, CV_8UC3);
@@ -44,7 +44,6 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "%d\n", imgSize);
         // Allocate container to load frames
         // Copy a frame to the buffer
-        memcpy(buffer, server_img.data, imgSize);
 
         // Here, we assume that the buffer is transmitted from the server to the
         // client Copy a frame from the buffer to the container of the client
@@ -52,13 +51,13 @@ int main(int argc, char *argv[]) {
         memcpy(iptr, buffer, imgSize);
 
         // show the frame
-        imshow("Video", client_img);
+        // imshow("Video", client_img);
 
         // Press ESC on keyboard to exit
         // Notice: this part is necessary due to openCV's design.
         // waitKey function means a delay to get the next frame. You can change
         // the value of delay to see what will happen
-        char c = (char)waitKey(30);
+        char c = (char)waitKey(100);
         if (c == 27) break;
     }
     fclose(fp);
