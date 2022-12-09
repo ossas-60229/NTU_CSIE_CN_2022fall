@@ -61,6 +61,6 @@ int main(int argc, char *argv[]) {
         if (c == 27) break;
     }
     fclose(fp);
-    destroyAllWindows();
+    // destroyAllWindows();
     return 0;
 }

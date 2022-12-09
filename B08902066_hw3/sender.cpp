@@ -3,6 +3,9 @@
 using namespace cv;
 #define THRESH 16
 #define DWSIZE 1
+#define buff_size 1000
+static int read_final = 0;
+FILE *fp = fopen("tempfuck.txt", "w");
 void setIP(char *dst, const char *src);
 void corruptData(char *data, int len);
 void initSEG(SEGMENT &a);
@@ -11,7 +14,6 @@ void empback(LIST &lit, SEGMENT &seg);
 void empfront(LIST &lit, SEGMENT &seg);
 void popback(LIST &lit);
 void popfront(LIST &lit);
-// unsigned long get_checksum_pipe(char *str);
 unsigned long get_checksum(char *str) {
     char data[1000];
     memcpy(data, str, 1000);
@@ -19,6 +21,37 @@ unsigned long get_checksum(char *str) {
     return checksum;
 }
 
+void getshit(LIST &lit, Mat &tmp_frame, int &seq) {
+    if (tmp_frame.empty()) {
+        SEGMENT *tmp_seg = (SEGMENT *)malloc(sizeof(SEGMENT));
+        tmp_seg->header.fin = 1;
+        empback(*tmp_seg);
+        read_final = 1;
+        return;
+    }
+    int imgSize = tmp_frame.total() * tmp_frame.elemSize();
+    uchar *p = tmp_frame.data;
+    char *fuck = new char[imgSize];
+    memcpy(fuck, p, imgSize);
+    int rest = imgSize;
+    while (rest > 0) {
+        SEGMENT *tmp_seg = (SEGMENT *)malloc(sizeof(SEGMENT));
+        int set = buff_size;
+        if (rest < set) set = rest;
+        tmp_seg->header.seqNumber = seq++;
+        tmp_seg->header.fin = 0;
+        tmp_seg->header.length = set;
+        memcpy(tmp_seg->data, &fuck[imgSize - rest], set);
+        tmp_seg->header.checksum = get_checksum(tmp_seg->data);
+        fwrite(tmp_seg->data, sizeof(char), set, fp);
+        fflush(fp);
+        empback(lit, *tmp_seg);
+        rest -= set;
+        free(tmp_seg);
+    }
+    return;
+}
+// unsigned long get_checksum_pipe(char *str);
 int max(int a, int b) { return (a > b) ? a : b; }
 int main(int argc, char *argv[]) {
     if (argc != 4)
@@ -100,38 +133,10 @@ int main(int argc, char *argv[]) {
     int64_t start_t = clock(), now_t = clock();
     char *p = NULL, *tmp_buf = (char *)malloc(sizeof(char));
     SEGNODE *node_now = NULL;
-    FILE *fp = fopen("tempfuck.txt", "w");
     while (1) {
-        if (p == NULL) {
+        if (window_list.size < 100 && (!read_final)) {
             cap >> tmp_frame;
-            // some frame is finished
-            if (!tmp_frame.empty()) {  // not yet
-                len = tmp_frame.elemSize() * tmp_frame.total();
-                tmp_buf = new char[len];
-
-                memcpy(tmp_buf, tmp_frame.data, len);
-                p = tmp_buf;
-                p = collectSEG(now_seg, p);
-            } else {
-                now_seg.header.fin = 1;
-            }
-        } else {
-            p = collectSEG(now_seg, p);
-        }
-        if (now_seg.header.length == sizeof(now_seg.data) ||
-            now_seg.header.fin == 1) {
-            now_seg.header.seqNumber = seq++;
-            now_seg.header.checksum = get_checksum(now_seg.data);
-            fwrite(now_seg.data, sizeof(char), now_seg.header.length, fp);
-            fflush(fp);
-            now_seg.header.fin = 0;
-            empback(window_list, now_seg);
-            if (tmp_frame.empty()) {
-                now_seg.header.fin = 1;
-                empback(window_list, now_seg);
-            }
-        } else {
-            continue;
+            getshit(window_list, tmp_frame, seq);
         }
         if (node_now == NULL) node_now = window_list.head;
         if (node_now->seg.header.seqNumber <= win_right) {

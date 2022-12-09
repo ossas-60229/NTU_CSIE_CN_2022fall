@@ -4,7 +4,7 @@ using namespace cv;
 #define buff_size 256
 #define SEG_SIZE 1000
 SEGMENT buffer_pkt[buff_size];
-int frame_number = 0;
+static int frame_number = 0, frame_collect = 0;
 const char *player_exec = "./openCV";
 
 void initSEG(SEGMENT &a) {
@@ -41,6 +41,7 @@ void play_vid(const char *filename, int width, int height) {
     }
 }
 int flush_vid(SEGMENT *buffer, int index, int width, int height) {
+    return 0;
     Mat tmp = Mat::zeros(height, width, CV_8UC3);
     int imgSize = tmp.elemSize() * tmp.total(), now = 0;
     int frnumber = index * SEG_SIZE / imgSize;
@@ -55,6 +56,7 @@ int flush_vid(SEGMENT *buffer, int index, int width, int height) {
             uchar *p = (uchar *)buffer_pkt[now].data;
             int set = min(rest, buffer_pkt[now].header.length);
             memcpy(&tmp_buffer[imgSize - rest], p, set);
+            frame_collect += set;
             rest -= set;
             buffer_pkt[now].header.length -= set;
             if (buffer_pkt[now].header.length > rest) {
@@ -71,6 +73,7 @@ int flush_vid(SEGMENT *buffer, int index, int width, int height) {
         fwrite(tmp_buffer, sizeof(uchar), imgSize, fp);
     }
     fclose(fp);
+    frame_collect = frame_collect % imgSize;
     play_vid(filename, width, height);
     for (int i = now; i < buff_size; i++) buffer_pkt[i - now] = buffer_pkt[i];
     return buff_size - now;
