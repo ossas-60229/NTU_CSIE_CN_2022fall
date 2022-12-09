@@ -136,10 +136,11 @@ int main(int argc, char *argv[]) {
     char *p = NULL, *tmp_buf = (char *)malloc(sizeof(char));
     SEGNODE *node_now = NULL;
     while (1) {
-        if (window_list.size < 100 && (!read_final)) {
+        if (/*window_list.size < 100 &&*/ (!read_final)) {
             cap >> tmp_frame;
             getshit(window_list, tmp_frame, seq);
         }
+        continue;
         if (node_now == NULL) node_now = window_list.head;
         if (node_now->seg.header.seqNumber <= win_right) {
             dosend = 1;
@@ -210,6 +211,7 @@ int main(int argc, char *argv[]) {
         }
         initSEG(now_seg);
     }
+    cap.release();
     fclose(fp);
     return 0;
 }
