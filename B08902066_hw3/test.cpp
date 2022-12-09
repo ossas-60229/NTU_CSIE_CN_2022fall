@@ -21,7 +21,7 @@ int main() {
         if (tmp_frame.empty()) break;
         uchar buf[imgSize];
         memcpy(buf, tmp_frame.data, imgSize);
-        fwrite(p, imgSize, 1, fp);
+        fwrite(buf, imgSize, 1, fp);
         fflush(fp);
     }
     fclose(fp);

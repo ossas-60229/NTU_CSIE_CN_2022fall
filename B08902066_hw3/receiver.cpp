@@ -36,7 +36,7 @@ int flush_vid(SEGMENT *buffer, int index, int width, int height) {
         int rest = imgSize;
         while (rest != 0) {
             if (frnumber-- <= 0) break;
-            uchar *p = buffer_pkt[now].data;
+            uchar *p = (uchar *)buffer_pkt[now].data;
             int set = min(rest, buffer_pkt[now].header.length);
             memcpy(&tmp_buffer[imgSize - rest], p, set);
             rest -= set;
@@ -53,7 +53,7 @@ int flush_vid(SEGMENT *buffer, int index, int width, int height) {
             }
         }
         memcpy(tmp.data, tmp_buffer, imgSize);
-        imgshow("fuck", tmp);
+        imshow("fuck", tmp);
     }
     return now;
 }
