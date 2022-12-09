@@ -10,7 +10,7 @@ void setIP(char *dst, const char *src);
 void corruptData(char *data, int len);
 void initSEG(SEGMENT &a);
 char *collectSEG(SEGMENT &seg, char *buff);
-void empback(LIST &lit, SEGMENT &seg);
+void empback(LIST &lit, SEGMENT seg);
 void empfront(LIST &lit, SEGMENT &seg);
 void popback(LIST &lit);
 void popfront(LIST &lit);
@@ -136,11 +136,10 @@ int main(int argc, char *argv[]) {
     char *p = NULL, *tmp_buf = (char *)malloc(sizeof(char));
     SEGNODE *node_now = NULL;
     while (1) {
-        if (/*window_list.size < 100 &&*/ (!read_final)) {
+        if (window_list.size < 1000 && (!read_final)) {
             cap >> tmp_frame;
             getshit(window_list, tmp_frame, seq);
         }
-        continue;
         if (node_now == NULL) node_now = window_list.head;
         if (node_now->seg.header.seqNumber <= win_right) {
             dosend = 1;
@@ -254,7 +253,7 @@ char *collectSEG(SEGMENT &seg, char *buff) {
         return NULL;
     }
 }
-void empback(LIST &lit, SEGMENT &seg) {
+void empback(LIST &lit, SEGMENT seg) {
     SEGNODE *nod = (SEGNODE *)malloc(sizeof(SEGNODE));
     nod->seg = seg;
     nod->next = NULL;
