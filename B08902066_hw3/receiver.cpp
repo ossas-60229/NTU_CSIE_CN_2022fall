@@ -6,78 +6,37 @@ using namespace cv;
 SEGMENT buffer_pkt[buff_size];
 static int frame_number = 0, frame_collect = 0;
 const char *player_exec = "./openCV";
-
-void initSEG(SEGMENT &a) {
-    a.header.ack = 0;
-    a.header.ackNumber = 0;
-    a.header.fin = 0;
-    a.header.checksum = 0;
-    a.header.length = 0;
-    a.header.seqNumber = 0;
-    a.header.syn = 0;
-    memset(a.data, 0, sizeof(a.data));
-    return;
-}
-void setIP(char *dst, const char *src);
-void corruptData(char *data, int len);
-unsigned long get_checksum(char *str) {
-    char data[1000];
-    memcpy(data, str, 1000);
-    unsigned long checksum = crc32(0L, (const Bytef *)data, 1000);
-    return checksum;
-}
-int min(int a, int b) { return (a < b) ? a : b; }
+const char *fifo_name = "video.fifo";
+FILE *fp;
 pid_t pid = -1;
-void play_vid(const char *filename, int width, int height) {
-    char wid[50], h[50];
-    sprintf(wid, "%d", width);
+
+void init_player(int width, int height) {
+    char w[50], h[50];
+    sprintf(w, "%d", width);
     sprintf(h, "%d", height);
-    if (pid > 0) waitpid(pid, NULL, 0);
+    mkfifo(fifo_name, 0777);
+    fp = fopen(fifo_name, "w");
     pid = fork();
     if (pid == 0) {
-        execlp(player_exec, player_exec, filename, wid, h, NULL);
-    } else {
-        return;
+        execlp(player_exec, player_exec, fifo_name, w, h, NULL);
     }
+    return;
 }
-int flush_vid(SEGMENT *buffer, int index, int width, int height) {
-    return 0;
-    Mat tmp = Mat::zeros(height, width, CV_8UC3);
-    int imgSize = tmp.elemSize() * tmp.total(), now = 0;
-    int frnumber = index * SEG_SIZE / imgSize;
-    char filename[100];
-    sprintf(filename, "frame%d.seg", frame_number++);
-    FILE *fp = fopen(filename, "w");
-    while (1) {
-        if (frnumber-- <= 0) break;
-        uchar tmp_buffer[imgSize];
-        int rest = imgSize;
-        while (rest != 0) {
-            uchar *p = (uchar *)buffer_pkt[now].data;
-            int set = min(rest, buffer_pkt[now].header.length);
-            memcpy(&tmp_buffer[imgSize - rest], p, set);
-            frame_collect += set;
-            rest -= set;
-            buffer_pkt[now].header.length -= set;
-            if (buffer_pkt[now].header.length > rest) {
-                char buf[SEG_SIZE];
-                memcpy(buf, &buffer_pkt[now].data[set],
-                       buffer_pkt[now].header.length);
-                memset(buffer_pkt[now].data, 0, buff_size);
-                memcpy(buffer_pkt[now].data, buf,
-                       buffer_pkt[now].header.length);
-            } else {
-                now++;
-            }
-        }
-        fwrite(tmp_buffer, sizeof(uchar), imgSize, fp);
+void flush_vid(int index) {
+    for (int i = 0; i < index) {
+        fwrite(buffer_pkt[i].data, sizeof(char), buffer_pkt[i].header.length,
+               fp);
+        fflush(fp);
     }
-    fclose(fp);
-    frame_collect = frame_collect % imgSize;
-    play_vid(filename, width, height);
-    for (int i = now; i < buff_size; i++) buffer_pkt[i - now] = buffer_pkt[i];
-    return buff_size - now;
+    return;
 }
+
+void initSEG(SEGMENT &a);
+void setIP(char *dst, const char *src);
+void corruptData(char *data, int len);
+unsigned long get_checksum(char *str);
+int min(int a, int b) { return (a < b) ? a : b; }
+pid_t pid = -1;
 int main(int argc, char *argv[]) {
     if (argc != 3)
         ERR_EXIT("usage: ./receiver <receiver port> <agent IP>:<agent port>");
@@ -143,12 +102,15 @@ int main(int argc, char *argv[]) {
                         if (now_seg.header.seqNumber > 0) {
                             memcpy(&buffer_pkt[index++], &now_seg,
                                    sizeof(SEGMENT));
+                        } else {
+                            init_player(width, height);
                         }
                         ack_sure++;
                     } else {
                         fprintf(stderr, "drop\tdata\t#%d\t(buffer overflow)\n",
                                 now_seg.header.seqNumber);
-                        index = flush_vid(buffer_pkt, index, width, height);
+                        flush_vid(index, width, height);
+                        index = 0;
                     }
                 } else {
                     fprintf(stderr, "drop\tdata\t#%d\t(corrupted)\n",
@@ -164,7 +126,7 @@ int main(int argc, char *argv[]) {
                    (struct sockaddr *)&agent, addr_len);
             if (now_seg.header.seqNumber == ack_sure && now_seg.header.fin) {
                 fprintf(stderr, "send\tfinack\n");
-                flush_vid(buffer_pkt, index, width, height);
+                flush_vid(index, width, height);
                 break;
             } else {
                 fprintf(stderr, "send\tack\t#%d\n", now_seg.header.ackNumber);
@@ -172,6 +134,8 @@ int main(int argc, char *argv[]) {
         }
         initSEG(now_seg);
     }
+    if (pid > 0) wait(pid, NULL, 0);
+    fclose(fp);
     wait(NULL);
     return 0;
 }
@@ -189,4 +153,22 @@ void corruptData(char *data, int len) {
     for (int i = 0; i < len; ++i) {
         data[i] = ~data[i];
     }
+}
+
+void initSEG(SEGMENT &a) {
+    a.header.ack = 0;
+    a.header.ackNumber = 0;
+    a.header.fin = 0;
+    a.header.checksum = 0;
+    a.header.length = 0;
+    a.header.seqNumber = 0;
+    a.header.syn = 0;
+    memset(a.data, 0, sizeof(a.data));
+    return;
+}
+unsigned long get_checksum(char *str) {
+    char data[1000];
+    memcpy(data, str, 1000);
+    unsigned long checksum = crc32(0L, (const Bytef *)data, 1000);
+    return checksum;
 }
