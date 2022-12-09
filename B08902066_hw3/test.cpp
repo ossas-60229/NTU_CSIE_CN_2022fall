@@ -1,6 +1,3 @@
-#include <fstream>
-#include <iostream>
-
 #include "GBN.hpp"
 #include "opencv2/opencv.hpp"
 using namespace std;
@@ -14,7 +11,7 @@ int main() {
     int height = cap.get(CAP_PROP_FRAME_HEIGHT);
     Mat tmp_frame = Mat::zeros(height, width, CV_8UC3);
     if (!tmp_frame.isContinuous()) {
-        tmp_frame = tmp_frame.clone;
+        tmp_frame = tmp_frame.clone();
     }
     FILE *fp = fopen("fuck.mpg", "w");
     int imgSize = tmp_frame.elemSize() * tmp_frame.total();
