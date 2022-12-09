@@ -39,6 +39,6 @@ int main() {
     }
     fclose(fp);
     cap.release();
-
+    waitpid(pid, NULL, 0);
     return 0;
 }
