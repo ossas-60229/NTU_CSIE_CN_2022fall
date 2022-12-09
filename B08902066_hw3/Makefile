@@ -32,7 +32,7 @@ player:
 TCPP:
 	$(CC) test.cpp -lz -o test $(INCLUDE_OPENCV)
 testagent:
-	./agent 1234 local:1235 local:1236 0.3
+	./agent 1234 local:1235 local:1236 0.05
 testsend:
 	./sender 1235 local:1234 video.mpg
 testrecv:
