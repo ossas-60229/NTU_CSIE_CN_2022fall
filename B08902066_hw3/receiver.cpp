@@ -11,17 +11,17 @@ FILE *fp;
 pid_t pid = -1;
 
 void init_player(int width, int height) {
-    char w[50], h[50];
-    sprintf(w, "%d", width);
-    sprintf(h, "%d", height);
     mkfifo(fifo_name, 0777);
-    fp = fopen(fifo_name, "w");
     pid = fork();
     if (pid == 0) {
+        char w[50], h[50];
+        sprintf(w, "%d", width);
+        sprintf(h, "%d", height);
         fprintf(stderr, "start execlp\n");
         execlp(player_exec, player_exec, fifo_name, w, h, NULL);
+    } else {
+        fp = fopen(fifo_name, "w");
     }
-    fprintf(stderr, "start init\n");
     return;
 }
 void flush_vid(int index) {
@@ -85,7 +85,6 @@ int main(int argc, char *argv[]) {
     int ack_sure = -1;
     SEGMENT now_seg;
     // first receive resolution
-    VideoCapture cap;
     int width = 0, height = 0, index = 0;  // index of buffer
     while (1) {
         if (recvfrom(recvsocket, &now_seg, sizeof(SEGMENT), 0,
