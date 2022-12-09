@@ -25,7 +25,7 @@ void getshit(LIST &lit, Mat &tmp_frame, int &seq) {
     if (tmp_frame.empty()) {
         SEGMENT *tmp_seg = (SEGMENT *)malloc(sizeof(SEGMENT));
         tmp_seg->header.fin = 1;
-        empback(*tmp_seg);
+        empback(lit, *tmp_seg);
         read_final = 1;
         return;
     }
