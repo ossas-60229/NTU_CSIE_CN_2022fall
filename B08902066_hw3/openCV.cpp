@@ -9,16 +9,14 @@ using namespace cv;
 
 int main(int argc, char *argv[]) {
     Mat server_img, client_img;
-    if (argc != 2) {
-        fprintf(stderr, "play error");
+    if (argc != 4) {
+        fprintf(stderr, "argument error");
     }
-    fprintf(stderr, "before capture %s\n", argv[1]);
-    VideoCapture cap(argv[1]);
-    fprintf(stderr, "after capture\n");
+    FILE *fp = fopen(argv[1], "r");
 
     // Get the resolution of the video
-    int width = cap.get(CAP_PROP_FRAME_WIDTH);
-    int height = cap.get(CAP_PROP_FRAME_HEIGHT);
+    int width = atoi(2);
+    int height = atoi(3);
 
     // Allocate container to load frames
     server_img = Mat::zeros(height, width, CV_8UC3);
@@ -33,18 +31,15 @@ int main(int argc, char *argv[]) {
         client_img = client_img.clone();
     }
 
-    fprintf(stderr, "before loop\n");
     while (1) {
         // Get a frame from the video to the container of the server.
-        cap >> server_img;
-        if (server_img.empty()) break;
         // Get the size of a frame in bytes
         int imgSize = server_img.total() * server_img.elemSize();
 
         // Allocate a buffer to load the frame (there would be 2 buffers in the
         // world of the Internet)
-        char buffer[imgSize];
-
+        uchar buffer[imgSize];
+        fread(buffer, imgSize, 1, fp);
         // Copy a frame to the buffer
         memcpy(buffer, server_img.data, imgSize);
 
