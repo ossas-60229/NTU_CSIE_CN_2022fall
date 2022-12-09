@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
     int64_t start_t = clock(), now_t = clock();
     char *p = NULL, *tmp_buf = (char *)malloc(sizeof(char));
     SEGNODE *node_now = NULL;
-    FILE *fp = fopen("temp.txt", "a");
+    FILE *fp = fopen("tempfuck.txt", "w");
     while (1) {
         if (p == NULL) {
             cap >> tmp_frame;
@@ -110,7 +110,6 @@ int main(int argc, char *argv[]) {
                 tmp_buf = new char[len];
 
                 memcpy(tmp_buf, tmp_frame.data, len);
-                fwrite(tmp_buf, 1, len, fp);
                 p = tmp_buf;
                 p = collectSEG(now_seg, p);
             } else {
@@ -123,6 +122,8 @@ int main(int argc, char *argv[]) {
             now_seg.header.fin == 1) {
             now_seg.header.seqNumber = seq++;
             now_seg.header.checksum = get_checksum(now_seg.data);
+            fwrite(now_seg.data, sizeof(char), now_seg.header.length, fp);
+            fflush(fp);
             now_seg.header.fin = 0;
             empback(window_list, now_seg);
             if (tmp_frame.empty()) {
