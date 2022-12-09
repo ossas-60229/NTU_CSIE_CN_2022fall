@@ -48,10 +48,10 @@ int flush_vid(SEGMENT *buffer, int index, int width, int height) {
     sprintf(filename, "frame%d.seg", frame_number++);
     FILE *fp = fopen(filename, "w");
     while (1) {
+        if (frnumber-- <= 0) break;
         uchar tmp_buffer[imgSize];
         int rest = imgSize;
         while (rest != 0) {
-            if (frnumber-- <= 0) break;
             uchar *p = (uchar *)buffer_pkt[now].data;
             int set = min(rest, buffer_pkt[now].header.length);
             memcpy(&tmp_buffer[imgSize - rest], p, set);
