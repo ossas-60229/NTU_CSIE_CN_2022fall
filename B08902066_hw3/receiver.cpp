@@ -11,7 +11,6 @@ FILE *fp;
 pid_t pid = -1;
 
 void init_player(int width, int height) {
-    return;
     mkfifo(fifo_name, 0777);
     pid = fork();
     if (pid == 0) {
@@ -26,7 +25,6 @@ void init_player(int width, int height) {
     return;
 }
 void flush_vid(int index) {
-    return;
     for (int i = 0; i < index; i++) {
         fwrite(buffer_pkt[i].data, sizeof(char), buffer_pkt[i].header.length,
                fp);
