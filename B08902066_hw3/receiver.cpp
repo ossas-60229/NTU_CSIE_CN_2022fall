@@ -27,10 +27,26 @@ unsigned long get_checksum(char *str) {
     return checksum;
 }
 int min(int a, int b) { return (a < b) ? a : b; }
+pid_t pid = -1;
+void play_vid(const char *filename, int width, int height) {
+    char wid[50], h[50];
+    sprintf(wid, "%d", width);
+    sprintf(h, "%d", height);
+    if (pid > 0) waitpid(pid, NULL, 0);
+    pid = fork();
+    if (pid == 0) {
+        execlp(player_exec, player_exec, filename, wid, h, NULL);
+    } else {
+        return;
+    }
+}
 int flush_vid(SEGMENT *buffer, int index, int width, int height) {
-    Mat tmp = Mat::zeros(height, width, CV8UC3);
+    Mat tmp = Mat::zeros(height, width, CV_8UC3);
     int imgSize = tmp.elemSize() * tmp.total(), now = 0;
     int frnumber = index * SEG_SIZE / imgSize;
+    char filename[100];
+    sprintf(filename, "frame%d.seg", frame_number++);
+    FILE *fp = fopen(filename, "w");
     while (1) {
         uchar tmp_buffer[imgSize];
         int rest = imgSize;
@@ -52,10 +68,12 @@ int flush_vid(SEGMENT *buffer, int index, int width, int height) {
                 now++;
             }
         }
-        memcpy(tmp.data, tmp_buffer, imgSize);
-        imshow("fuck", tmp);
+        fwrite(tmp_buffer, sizeof(uchar), imgSize, fp);
     }
-    return now;
+    fclose(fp);
+    play_vid(filename, width, height);
+    for (int i = now; i < buff_size; i++) buffer_pkt[i - now] = buffer_pkt[i];
+    return buff_size - now;
 }
 int main(int argc, char *argv[]) {
     if (argc != 3)
@@ -130,8 +148,7 @@ int main(int argc, char *argv[]) {
                     } else {
                         fprintf(stderr, "drop\tdata\t#%d\t(buffer overflow)\n",
                                 now_seg.header.seqNumber);
-                        flush_vid(buffer_pkt, index);
-                        index = 0;
+                        index = flush_vid(buffer_pkt, index);
                     }
                 } else {
                     fprintf(stderr, "drop\tdata\t#%d\t(corrupted)\n",
@@ -155,7 +172,7 @@ int main(int argc, char *argv[]) {
         }
         initSEG(now_seg);
     }
-
+    wait(NULL);
     return 0;
 }
 void setIP(char *dst, const char *src) {
