@@ -148,7 +148,7 @@ int main(int argc, char *argv[]) {
                     } else {
                         fprintf(stderr, "drop\tdata\t#%d\t(buffer overflow)\n",
                                 now_seg.header.seqNumber);
-                        index = flush_vid(buffer_pkt, index);
+                        index = flush_vid(buffer_pkt, index, width, height);
                     }
                 } else {
                     fprintf(stderr, "drop\tdata\t#%d\t(corrupted)\n",
@@ -164,7 +164,7 @@ int main(int argc, char *argv[]) {
                    (struct sockaddr *)&agent, addr_len);
             if (now_seg.header.seqNumber == ack_sure && now_seg.header.fin) {
                 fprintf(stderr, "send\tfinack\n");
-                flush_vid(buffer_pkt, index);
+                flush_vid(buffer_pkt, index, width, height);
                 break;
             } else {
                 fprintf(stderr, "send\tack\t#%d\n", now_seg.header.ackNumber);
