@@ -23,7 +23,7 @@ void init_player(int width, int height) {
     return;
 }
 void flush_vid(int index) {
-    for (int i = 0; i < index) {
+    for (int i = 0; i < index; i++) {
         fwrite(buffer_pkt[i].data, sizeof(char), buffer_pkt[i].header.length,
                fp);
         fflush(fp);
@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
                     } else {
                         fprintf(stderr, "drop\tdata\t#%d\t(buffer overflow)\n",
                                 now_seg.header.seqNumber);
-                        flush_vid(index, width, height);
+                        flush_vid(index);
                         index = 0;
                     }
                 } else {
@@ -126,7 +126,7 @@ int main(int argc, char *argv[]) {
                    (struct sockaddr *)&agent, addr_len);
             if (now_seg.header.seqNumber == ack_sure && now_seg.header.fin) {
                 fprintf(stderr, "send\tfinack\n");
-                flush_vid(index, width, height);
+                flush_vid(index);
                 break;
             } else {
                 fprintf(stderr, "send\tack\t#%d\n", now_seg.header.ackNumber);
@@ -134,7 +134,7 @@ int main(int argc, char *argv[]) {
         }
         initSEG(now_seg);
     }
-    if (pid > 0) wait(pid, NULL, 0);
+    if (pid > 0) waitpid(pid, NULL, 0);
     fclose(fp);
     wait(NULL);
     return 0;
