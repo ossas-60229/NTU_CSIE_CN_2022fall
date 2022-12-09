@@ -15,8 +15,8 @@ int main(int argc, char *argv[]) {
     FILE *fp = fopen(argv[1], "r");
 
     // Get the resolution of the video
-    int width = atoi(2);
-    int height = atoi(3);
+    int width = atoi(argv[2]);
+    int height = atoi(argv[3]);
 
     // Allocate container to load frames
     server_img = Mat::zeros(height, width, CV_8UC3);
