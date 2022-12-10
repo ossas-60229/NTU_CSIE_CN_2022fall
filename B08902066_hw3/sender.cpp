@@ -167,7 +167,8 @@ int main(int argc, char *argv[]) {
         if (now_t - start_t >= 1 * CLOCKS_PER_SEC) {
             winsize = 1;
             win_right = win_left;
-            if (seq > 0) threshold = max(winsize / 2, 1);
+            threshold = max(winsize / 2, 1);
+            fprintf(stderr, "time\tout,\t\tthreshold = %d\n", threshold);
             node_now = NULL;
             start_t = clock();
         }
