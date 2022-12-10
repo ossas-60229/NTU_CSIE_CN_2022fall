@@ -15,7 +15,7 @@ PLAYER_EXEC = player
 FIFO_FILE = *.fifo
 
 INCLUDE_OPENCV = `pkg-config --cflags --libs opencv4`
-all: agent crc32 sender receiver openCV
+all: agent sender receiver openCV
 
 agent:
 	$(CC) $(AGENT_SRC) -o $(AGENT_EXEC)
