@@ -125,7 +125,7 @@ int main(int argc, char *argv[]) {
     SEGMENT now_seg;
     initSEG(now_seg);
     printf("hight is %d, width is %d\n", height, width);
-    sprintf(now_seg.data, "%d %d\n", height, width);
+    sprintf(now_seg.data, "%d %d\n", width, height);
     now_seg.header.checksum = get_checksum(now_seg.data);
     empback(window_list, now_seg);
     initSEG(now_seg);

@@ -23,7 +23,6 @@ void init_player(int width, int height) {
         char w[50], h[50];
         sprintf(w, "%d", width);
         sprintf(h, "%d", height);
-        fprintf(stderr, "start execlp\n");
         execlp(player_exec, player_exec, fifo_name, w, h, NULL);
     } else {
         fp = fopen(fifo_name, "w");
