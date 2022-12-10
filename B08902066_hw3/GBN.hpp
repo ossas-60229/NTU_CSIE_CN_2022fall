@@ -18,6 +18,7 @@
 
 using namespace std;
 #define SEG_SIZE 1000
+#define BUFF_SIZE 256
 
 #define ERR_EXIT(msg)                 \
     {                                 \
@@ -37,7 +38,7 @@ typedef struct {
 
 typedef struct {
     HEADER header;
-    char data[1000];
+    char data[SEG_SIZE];
 } SEGMENT;
 typedef struct NODE {
     SEGMENT seg;

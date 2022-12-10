@@ -1,9 +1,8 @@
 #include "GBN.hpp"
 #include "opencv2/opencv.hpp"
 using namespace cv;
-#define buff_size 256
-SEGMENT buffer_pkt[buff_size];
-static int frame_number = 0, frame_collect = 0, ww, hh;
+SEGMENT buffer_pkt[BUFF_SIZE];
+static int frame_number = 0, frame_collect = 0, now_width, now_height;
 const char *player_exec = "./openCV";
 const char *fifo_name = "video.fifo";
 FILE *fp;
@@ -35,8 +34,14 @@ void init_player(int width, int height) {
 void flush_vid(int index) {
     fprintf(stderr, "flush\n");
     for (int i = 0; i < index; i++) {
-        fwrite(buffer_pkt[i].data, sizeof(char), buffer_pkt[i].header.length,
-               fp);
+        if (buffer_pkt[i].header.seqNumber == 0) {
+            int width, height;
+            sscanf(buffer_pkt, "%d %d", &width, &height);
+            init_player(width, height);
+        } else {
+            fwrite(buffer_pkt[i].data, sizeof(char),
+                   buffer_pkt[i].header.length, fp);
+        }
     }
     fflush(fp);
     return;
@@ -98,22 +103,13 @@ int main(int argc, char *argv[]) {
     while (1) {
         if (recvfrom(recvsocket, &now_seg, sizeof(SEGMENT), 0,
                      (struct sockaddr *)&agent, &addr_len) > 0) {
-            if (ack_sure < 0) {
-                sscanf(now_seg.data, "%d %d", &height, &width);
-                printf("height is %d, width is %d\n", height, width);
-            }
             if (now_seg.header.seqNumber == ack_sure + 1) {
                 unsigned long checksum = get_checksum(now_seg.data);
                 if (checksum == now_seg.header.checksum) {
-                    if (index < buff_size) {
+                    if (index < BUFF_SIZE) {
                         fprintf(stderr, "recv\tdata\t#%d\n",
                                 now_seg.header.seqNumber);
-                        if (now_seg.header.seqNumber > 0) {
-                            memcpy(&buffer_pkt[index++], &now_seg,
-                                   sizeof(SEGMENT));
-                        } else {
-                            init_player(width, height);
-                        }
+                        memcpy(&buffer_pkt[index++], &now_seg, sizeof(SEGMENT));
                         ack_sure++;
                     } else {
                         fprintf(stderr, "drop\tdata\t#%d\t(buffer overflow)\n",

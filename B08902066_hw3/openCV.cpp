@@ -34,11 +34,6 @@ int main(int argc, char *argv[]) {
     int imgSize = server_img.total() * server_img.elemSize();
 
     while (!feof(fp)) {
-        // Get a frame from the video to the container of the server.
-        // Get the size of a frame in bytes
-
-        // Allocate a buffer to load the frame (there would be 2 buffers in the
-        // world of the Internet)
         uchar buffer[imgSize];
         fread(buffer, sizeof(uchar), imgSize, fp);
         // Allocate container to load frames
