@@ -13,46 +13,8 @@ void empback(LIST &lit, SEGMENT seg);
 void empfront(LIST &lit, SEGMENT &seg);
 void popback(LIST &lit);
 void popfront(LIST &lit);
-unsigned long get_checksum(char *str) {
-    char data[SEG_SIZE];
-    memcpy(data, str, SEG_SIZE);
-    unsigned long checksum = crc32(0L, (const Bytef *)data, SEG_SIZE);
-    return checksum;
-}
-
-void getshit(LIST &lit, Mat &tmp_frame, int &seq) {
-    if (tmp_frame.empty()) {
-        SEGMENT *tmp_seg = (SEGMENT *)malloc(sizeof(SEGMENT));
-        initSEG(*tmp_seg);
-        tmp_seg->header.fin = 1;
-        empback(lit, *tmp_seg);
-        read_final = 1;
-        return;
-    }
-    int imgSize = tmp_frame.total() * tmp_frame.elemSize();
-    uchar *p = tmp_frame.data;
-    char *fuck = new char[imgSize];
-    memcpy(fuck, p, imgSize);
-    int rest = imgSize;
-    while (rest > 0) {
-        SEGMENT *tmp_seg = (SEGMENT *)malloc(sizeof(SEGMENT));
-        initSEG(*tmp_seg);
-        int set = SEG_SIZE;
-        if (rest < set) set = rest;
-        tmp_seg->header.seqNumber = seq++;
-        tmp_seg->header.fin = 0;
-        tmp_seg->header.length = set;
-        memcpy(tmp_seg->data, &fuck[imgSize - rest], set);
-        tmp_seg->header.checksum = get_checksum(tmp_seg->data);
-        fwrite(tmp_seg->data, sizeof(char), set, fp);
-        fflush(fp);
-        empback(lit, *tmp_seg);
-        rest -= set;
-        free(tmp_seg);
-    }
-    return;
-}
-// unsigned long get_checksum_pipe(char *str);
+unsigned long get_checksum(char *str);
+void seg_collect(LIST &lit, Mat &tmp_frame, int &seq);
 int max(int a, int b) { return (a > b) ? a : b; }
 int main(int argc, char *argv[]) {
     if (argc != 4)
@@ -138,7 +100,7 @@ int main(int argc, char *argv[]) {
         if (window_list.size < winsize * 100 && (!read_final)) {
             // make sure the space complexity is acceptable
             cap >> tmp_frame;
-            getshit(window_list, tmp_frame, seq);
+            seg_collect(window_list, tmp_frame, seq);
         }
         if (node_now == NULL) node_now = window_list.head;
         if (node_now->seg.header.seqNumber <= win_right) {
@@ -311,5 +273,45 @@ void popfront(LIST &lit) {
     }
     lit.head = node;
     lit.size--;
+    return;
+}
+
+unsigned long get_checksum(char *str) {
+    char data[SEG_SIZE];
+    memcpy(data, str, SEG_SIZE);
+    unsigned long checksum = crc32(0L, (const Bytef *)data, SEG_SIZE);
+    return checksum;
+}
+
+void seg_collect(LIST &lit, Mat &tmp_frame, int &seq) {
+    if (tmp_frame.empty()) {
+        SEGMENT *tmp_seg = (SEGMENT *)malloc(sizeof(SEGMENT));
+        initSEG(*tmp_seg);
+        tmp_seg->header.fin = 1;
+        empback(lit, *tmp_seg);
+        read_final = 1;
+        return;
+    }
+    int imgSize = tmp_frame.total() * tmp_frame.elemSize();
+    uchar *p = tmp_frame.data;
+    char *fuck = new char[imgSize];
+    memcpy(fuck, p, imgSize);
+    int rest = imgSize;
+    while (rest > 0) {
+        SEGMENT *tmp_seg = (SEGMENT *)malloc(sizeof(SEGMENT));
+        initSEG(*tmp_seg);
+        int set = SEG_SIZE;
+        if (rest < set) set = rest;
+        tmp_seg->header.seqNumber = seq++;
+        tmp_seg->header.fin = 0;
+        tmp_seg->header.length = set;
+        memcpy(tmp_seg->data, &fuck[imgSize - rest], set);
+        tmp_seg->header.checksum = get_checksum(tmp_seg->data);
+        fwrite(tmp_seg->data, sizeof(char), set, fp);
+        fflush(fp);
+        empback(lit, *tmp_seg);
+        rest -= set;
+        free(tmp_seg);
+    }
     return;
 }
