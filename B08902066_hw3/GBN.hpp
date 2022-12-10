@@ -18,7 +18,7 @@
 
 using namespace std;
 #define SEG_SIZE 4000
-#define BUFF_SIZE 256
+#define BUFF_SIZE 1024
 
 #define ERR_EXIT(msg)                 \
     {                                 \
