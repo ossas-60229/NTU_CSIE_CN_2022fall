@@ -18,8 +18,8 @@ int main(int argc, char *argv[]) {
     // Get the resolution of the video
     int width = atoi(argv[2]);
     int height = atoi(argv[3]);
-    fprintf(stderr, "width is %d, height is %d\n", width, height);
-    // Allocate container to load frames
+    // fprintf(stderr, "width is %d, height is %d\n", width, height);
+    //  Allocate container to load frames
     server_img = Mat::zeros(height, width, CV_8UC3);
     client_img = Mat::zeros(height, width, CV_8UC3);
 

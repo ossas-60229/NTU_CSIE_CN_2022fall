@@ -13,43 +13,17 @@ void sighandler(int signo) {
     }
     return;
 }
-void init_player(int width, int height) {
-    signal(SIGPIPE, sighandler);
-    mkfifo(fifo_name, 0777);
-    now_width = width;
-    now_height = height;
-    pid = fork();
-    if (pid == 0) {
-        char w[50], h[50];
-        sprintf(w, "%d", width);
-        sprintf(h, "%d", height);
-        execlp(player_exec, player_exec, fifo_name, w, h, NULL);
-    } else {
-        fp = fopen(fifo_name, "w");
-        sleep(1);
-    }
-    return;
-}
-void flush_vid(int index) {
-    fprintf(stderr, "flush\n");
-    for (int i = 0; i < index; i++) {
-        if (buffer_pkt[i].header.seqNumber == 0) {
-            int width, height;
-            sscanf(buffer_pkt[i].data, "%d %d", &width, &height);
-            init_player(width, height);
-        } else {
-            fwrite(buffer_pkt[i].data, sizeof(char),
-                   buffer_pkt[i].header.length, fp);
-        }
-    }
-    fflush(fp);
-    return;
-}
-
+// handle the SIGPIPE signal
+void init_player(int width, int height);
+// initialize player
+void flush_vid(int index);
+// flush frame data to player process
 void initSEG(SEGMENT &a);
+// initialize some segment
 void setIP(char *dst, const char *src);
 void corruptData(char *data, int len);
 unsigned long get_checksum(char *str);
+// get the checksum
 int min(int a, int b) { return (a < b) ? a : b; }
 int main(int argc, char *argv[]) {
     if (argc != 3)
@@ -102,10 +76,10 @@ int main(int argc, char *argv[]) {
     while (1) {
         if (recvfrom(recvsocket, &now_seg, sizeof(SEGMENT), 0,
                      (struct sockaddr *)&agent, &addr_len) > 0) {
-            if (now_seg.header.seqNumber == ack_sure + 1) {
+            if (now_seg.header.seqNumber == ack_sure + 1) {  // order check
                 unsigned long checksum = get_checksum(now_seg.data);
-                if (checksum == now_seg.header.checksum) {
-                    if (index < BUFF_SIZE) {
+                if (checksum == now_seg.header.checksum) {  // checksum check
+                    if (index < BUFF_SIZE) {  // buffer flow or not
                         fprintf(stderr, "recv\tdata\t#%d\n",
                                 now_seg.header.seqNumber);
                         memcpy(&buffer_pkt[index++], &now_seg, sizeof(SEGMENT));
@@ -128,7 +102,8 @@ int main(int argc, char *argv[]) {
             now_seg.header.ackNumber = ack_sure;
             sendto(recvsocket, &now_seg, sizeof(SEGMENT), 0,
                    (struct sockaddr *)&agent, addr_len);
-            if (now_seg.header.seqNumber == ack_sure && now_seg.header.fin) {
+            if (now_seg.header.seqNumber == ack_sure &&
+                now_seg.header.fin) {  // finback
                 fprintf(stderr, "send\tfinack\n");
                 flush_vid(index);
                 break;
@@ -175,4 +150,36 @@ unsigned long get_checksum(char *str) {
     memcpy(data, str, SEG_SIZE);
     unsigned long checksum = crc32(0L, (const Bytef *)data, SEG_SIZE);
     return checksum;
+}
+void init_player(int width, int height) {
+    signal(SIGPIPE, sighandler);
+    mkfifo(fifo_name, 0777);
+    now_width = width;
+    now_height = height;
+    pid = fork();
+    if (pid == 0) {
+        char w[50], h[50];
+        sprintf(w, "%d", width);
+        sprintf(h, "%d", height);
+        execlp(player_exec, player_exec, fifo_name, w, h, NULL);
+    } else {
+        fp = fopen(fifo_name, "w");
+        sleep(1);
+    }
+    return;
+}
+void flush_vid(int index) {
+    fprintf(stderr, "flush\n");
+    for (int i = 0; i < index; i++) {
+        if (buffer_pkt[i].header.seqNumber == 0) {
+            int width, height;
+            sscanf(buffer_pkt[i].data, "%d %d", &width, &height);
+            init_player(width, height);
+        } else {
+            fwrite(buffer_pkt[i].data, sizeof(char),
+                   buffer_pkt[i].header.length, fp);
+        }
+    }
+    fflush(fp);
+    return;
 }

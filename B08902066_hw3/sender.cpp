@@ -136,6 +136,7 @@ int main(int argc, char *argv[]) {
     SEGNODE *node_now = NULL;
     while (1) {
         if (window_list.size < winsize * 100 && (!read_final)) {
+            // make sure the space complexity is acceptable
             cap >> tmp_frame;
             getshit(window_list, tmp_frame, seq);
         }
@@ -143,7 +144,7 @@ int main(int argc, char *argv[]) {
         if (node_now->seg.header.seqNumber <= win_right) {
             dosend = 1;
         } else {
-            dosend = 0;
+            dosend = 1;
         }
         if (dosend) {
             // send pkt
