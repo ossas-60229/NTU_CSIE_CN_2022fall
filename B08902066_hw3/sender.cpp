@@ -144,7 +144,7 @@ int main(int argc, char *argv[]) {
         if (node_now->seg.header.seqNumber <= win_right) {
             dosend = 1;
         } else {
-            dosend = 1;
+            dosend = 0;
         }
         if (dosend) {
             // send pkt
@@ -199,7 +199,7 @@ int main(int argc, char *argv[]) {
                 }
             }
         }
-        // fail
+        // fail check timeout
         now_t = clock();
         if (now_t - start_t >= 1 * CLOCKS_PER_SEC) {
             winsize = 1;
