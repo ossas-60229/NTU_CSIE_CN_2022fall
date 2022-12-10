@@ -17,6 +17,7 @@
 #include <zlib.h>
 
 using namespace std;
+#define SEG_SIZE 1000
 
 #define ERR_EXIT(msg)                 \
     {                                 \

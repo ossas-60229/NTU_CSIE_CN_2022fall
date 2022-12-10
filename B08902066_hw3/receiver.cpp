@@ -2,16 +2,23 @@
 #include "opencv2/opencv.hpp"
 using namespace cv;
 #define buff_size 256
-#define SEG_SIZE 1000
 SEGMENT buffer_pkt[buff_size];
-static int frame_number = 0, frame_collect = 0;
+static int frame_number = 0, frame_collect = 0, ww, hh;
 const char *player_exec = "./openCV";
 const char *fifo_name = "video.fifo";
 FILE *fp;
 pid_t pid = -1;
-
+void sighandler(int signo) {
+    if (signo == SIGPIPE) {
+        ERR_EXIT("player is stopped\n");
+    }
+    return;
+}
 void init_player(int width, int height) {
+    signal(SIGPIPE, sighandler);
     mkfifo(fifo_name, 0777);
+    ww = width;
+    hh = height;
     pid = fork();
     if (pid == 0) {
         char w[50], h[50];
@@ -30,8 +37,8 @@ void flush_vid(int index) {
     for (int i = 0; i < index; i++) {
         fwrite(buffer_pkt[i].data, sizeof(char), buffer_pkt[i].header.length,
                fp);
-        fflush(fp);
     }
+    fflush(fp);
     return;
 }
 
@@ -169,8 +176,8 @@ void initSEG(SEGMENT &a) {
     return;
 }
 unsigned long get_checksum(char *str) {
-    char data[1000];
-    memcpy(data, str, 1000);
-    unsigned long checksum = crc32(0L, (const Bytef *)data, 1000);
+    char data[SEG_SIZE];
+    memcpy(data, str, SEG_SIZE);
+    unsigned long checksum = crc32(0L, (const Bytef *)data, SEG_SIZE);
     return checksum;
 }

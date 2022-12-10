@@ -3,7 +3,6 @@
 using namespace cv;
 #define THRESH 16
 #define DWSIZE 1
-#define buff_size 1000
 static int read_final = 0;
 FILE *fp = fopen("tempfuck.txt", "w");
 void setIP(char *dst, const char *src);
@@ -15,9 +14,9 @@ void empfront(LIST &lit, SEGMENT &seg);
 void popback(LIST &lit);
 void popfront(LIST &lit);
 unsigned long get_checksum(char *str) {
-    char data[1000];
-    memcpy(data, str, 1000);
-    unsigned long checksum = crc32(0L, (const Bytef *)data, 1000);
+    char data[SEG_SIZE];
+    memcpy(data, str, SEG_SIZE);
+    unsigned long checksum = crc32(0L, (const Bytef *)data, SEG_SIZE);
     return checksum;
 }
 
@@ -38,7 +37,7 @@ void getshit(LIST &lit, Mat &tmp_frame, int &seq) {
     while (rest > 0) {
         SEGMENT *tmp_seg = (SEGMENT *)malloc(sizeof(SEGMENT));
         initSEG(*tmp_seg);
-        int set = buff_size;
+        int set = SEG_SIZE;
         if (rest < set) set = rest;
         tmp_seg->header.seqNumber = seq++;
         tmp_seg->header.fin = 0;
@@ -136,7 +135,7 @@ int main(int argc, char *argv[]) {
     char *p = NULL, *tmp_buf = (char *)malloc(sizeof(char));
     SEGNODE *node_now = NULL;
     while (1) {
-        if (window_list.size < 1000 && (!read_final)) {
+        if (window_list.size < winsize * 100 && (!read_final)) {
             cap >> tmp_frame;
             getshit(window_list, tmp_frame, seq);
         }
