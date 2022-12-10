@@ -36,7 +36,7 @@ void flush_vid(int index) {
     for (int i = 0; i < index; i++) {
         if (buffer_pkt[i].header.seqNumber == 0) {
             int width, height;
-            sscanf(buffer_pkt, "%d %d", &width, &height);
+            sscanf(buffer_pkt[i].data, "%d %d", &width, &height);
             init_player(width, height);
         } else {
             fwrite(buffer_pkt[i].data, sizeof(char),
