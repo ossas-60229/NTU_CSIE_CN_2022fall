@@ -32,9 +32,9 @@ int main(int argc, char *argv[]) {
         client_img = client_img.clone();
     }
     int imgSize = server_img.total() * server_img.elemSize();
+    uchar buffer[imgSize];
 
     while (!feof(fp)) {
-        uchar buffer[imgSize];
         fread(buffer, sizeof(uchar), imgSize, fp);
         // Allocate container to load frames
         // Copy a frame to the buffer
