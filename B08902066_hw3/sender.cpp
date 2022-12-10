@@ -194,8 +194,9 @@ int main(int argc, char *argv[]) {
                     win_right = win_left + winsize - 1;
                     popfront(window_list);
                 } else if (ack_sure >= win_left) {
-                    win_left = ack_sure + 1;
-                    popfront(window_list);
+                    while (win_left++ <= ack_sure) {
+                        popfront(window_list);
+                    }
                 }
             }
         }
