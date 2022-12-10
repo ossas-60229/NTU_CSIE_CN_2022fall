@@ -16,8 +16,8 @@ void sighandler(int signo) {
 void init_player(int width, int height) {
     signal(SIGPIPE, sighandler);
     mkfifo(fifo_name, 0777);
-    ww = width;
-    hh = height;
+    now_width = width;
+    now_height = height;
     pid = fork();
     if (pid == 0) {
         char w[50], h[50];
