@@ -24,20 +24,22 @@
 #include <sys/socket.h>
 #include <time.h>
 
-typedef struct {
-    int length;
-    int seqNumber;
-    int ackNumber;
-    int fin;
-    int syn;
-    int ack;
-    unsigned long checksum;
-} HEADER;
+#include "GBN.hpp"
 
-typedef struct {
-    HEADER header;
-    char data[1000];
-} SEGMENT;
+// typedef struct {
+// int length;
+// int seqNumber;
+// int ackNumber;
+// int fin;
+// int syn;
+// int ack;
+// unsigned long checksum;
+//} HEADER;
+
+// typedef struct {
+// HEADER header;
+// char data[1000];
+//} SEGMENT;
 
 void setIP(char *dst, const char *src) {
     if (strcmp(src, "0.0.0.0") == 0 || strcmp(src, "local") == 0 ||
