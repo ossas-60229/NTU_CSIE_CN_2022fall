@@ -26,6 +26,7 @@ void init_player(int width, int height) {
     return;
 }
 void flush_vid(int index) {
+    fprintf(stderr, "flush\n");
     for (int i = 0; i < index; i++) {
         fwrite(buffer_pkt[i].data, sizeof(char), buffer_pkt[i].header.length,
                fp);
