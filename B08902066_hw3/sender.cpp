@@ -184,7 +184,7 @@ int main(int argc, char *argv[]) {
                     ack_sure = now_seg.header.ackNumber;
 
                 fprintf(stderr, "recv\tack\t#%d\n", now_seg.header.ackNumber);
-                if (ack_sure == win_right) {
+                if (ack_sure == win_right) {  // congestion controll
                     if (winsize >= THRESH) {
                         winsize++;
                     } else {

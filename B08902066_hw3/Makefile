@@ -32,7 +32,7 @@ player:
 TCPP:
 	$(CC) test.cpp -lz -o test $(INCLUDE_OPENCV)
 testagent:
-	./agent 1234 local:1235 local:1236 0.01
+	./agent 1234 local:1235 local:1236 0
 testsend:
 	./sender 1235 local:1234 video.mpg
 testrecv:
@@ -45,4 +45,4 @@ killport:
 .PHONY: clean
 
 clean:
-	rm $(AGENT_EXEC) $(CRC32_EXEC) $(SENDER_EXEC) $(RECVER_EXEC) $(OPENCV_EXEC) $(FIFO_FILE)
+	rm $(AGENT_EXEC) $(SENDER_EXEC) $(RECVER_EXEC) $(OPENCV_EXEC) $(FIFO_FILE)
