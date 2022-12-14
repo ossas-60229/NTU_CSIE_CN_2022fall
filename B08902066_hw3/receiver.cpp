@@ -153,7 +153,7 @@ unsigned long get_checksum(char *str) {
 }
 void init_player(int width, int height) {
     signal(SIGPIPE, sighandler);
-return;
+    return;
     mkfifo(fifo_name, 0777);
     now_width = width;
     now_height = height;
@@ -165,14 +165,11 @@ return;
         execlp(player_exec, player_exec, fifo_name, w, h, NULL);
     } else {
         fp = fopen(fifo_name, "w");
-        sleep(1);
     }
     return;
 }
 void flush_vid(int index) {
     fprintf(stderr, "flush\n");
-return;
-
     for (int i = 0; i < index; i++) {
         if (buffer_pkt[i].header.seqNumber == 0) {
             int width, height;

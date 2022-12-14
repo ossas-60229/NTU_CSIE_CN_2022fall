@@ -1,6 +1,10 @@
 
-
 #include "opencv2/opencv.hpp"
+
+#include <fcntl.h>
+#include <sys/select.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include <iostream>
 
@@ -13,6 +17,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "argument error");
         exit(0);
     }
+    int fd = open(argv[1], O_RDONLY);
     FILE *fp = fopen(argv[1], "r");
 
     // Get the resolution of the video
