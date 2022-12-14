@@ -103,11 +103,7 @@ int main(int argc, char *argv[]) {
             seg_collect(window_list, tmp_frame, seq);
         }
         if (node_now == NULL) node_now = window_list.head;
-        if (node_now->seg.header.seqNumber <= win_right) {
-            dosend = 1;
-        } else {
-            dosend = 0;
-        }
+        dosend = 1;
         if (dosend) {
             // send pkt
             now_seg = node_now->seg;
