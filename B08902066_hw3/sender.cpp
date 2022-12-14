@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
             seg_collect(window_list, tmp_frame, seq);
         }
         if (node_now == NULL) node_now = window_list.head;
-        if (send_count <= winsize) {
+        if (send_count < winsize) {
             send_count++;
             // send pkt
             now_seg = node_now->seg;
@@ -135,13 +135,16 @@ int main(int argc, char *argv[]) {
         // recv ack
         if (recvfrom(sendersocket, &now_seg, sizeof(SEGMENT), 0,
                      (struct sockaddr *)&agent, &addr_len) > 0) {
-            ack_count++;
             if (now_seg.header.fin == 1) {
                 fprintf(stderr, "recv\tfinback\n");
                 break;
             }
             fprintf(stderr, "recv\tack\t#%d\n", now_seg.header.ackNumber);
             if (ack_sure < now_seg.header.ackNumber) {
+                while (ack_sure++ < now_seg.header.ackNumber) {
+                    popfront(window_list);
+                    ack_count++;
+                }
                 if (ack_count >= winsize) {  // congestion controll
                     if (winsize >= threshold) {
                         winsize++;
@@ -151,8 +154,6 @@ int main(int argc, char *argv[]) {
                     ack_count = 0;
                     send_count = 0;
                 }
-                while (ack_sure++ < now_seg.header.ackNumber)
-                    popfront(window_list);
             }
             start_t = clock();
         }
