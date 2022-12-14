@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
             seg_collect(window_list, tmp_frame, seq);
         }
         if (node_now == NULL) node_now = window_list.head;
-        if (send_count < winsize) {
+        if (send_count <= winsize) {
             send_count++;
             // send pkt
             now_seg = node_now->seg;
@@ -140,8 +140,8 @@ int main(int argc, char *argv[]) {
                 fprintf(stderr, "recv\tfinback\n");
                 break;
             }
+            fprintf(stderr, "recv\tack\t#%d\n", now_seg.header.ackNumber);
             if (ack_sure < now_seg.header.ackNumber) {
-                fprintf(stderr, "recv\tack\t#%d\n", now_seg.header.ackNumber);
                 if (ack_count >= winsize) {  // congestion controll
                     if (winsize >= threshold) {
                         winsize++;
