@@ -153,7 +153,8 @@ int main(int argc, char *argv[]) {
                 start_t = clock();
             }
         }
-        // fail check timeout
+        // fail check timout
+        // dusdss
         now_t = clock();
         if (now_t - start_t >= 1 * CLOCKS_PER_SEC) {
             ack_count = 0;
