@@ -107,7 +107,8 @@ int main(int argc, char *argv[]) {
             seg_collect(window_list, tmp_frame, seq);
         }
         if (node_now == NULL) node_now = window_list.head;
-        if (send_count++ < winsize) {
+        if (send_count < winsize) {
+            send_count++;
             // send pkt
             now_seg = node_now->seg;
             sendto(sendersocket, &now_seg, sizeof(SEGMENT), 0,
