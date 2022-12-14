@@ -153,7 +153,6 @@ unsigned long get_checksum(char *str) {
 }
 void init_player(int width, int height) {
     signal(SIGPIPE, sighandler);
-    return;
     mkfifo(fifo_name, 0777);
     now_width = width;
     now_height = height;
