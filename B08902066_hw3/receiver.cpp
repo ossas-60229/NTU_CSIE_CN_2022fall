@@ -179,7 +179,7 @@ void flush_vid(int index) {
     fprintf(stderr, "flush\n");
     if (buffer_pkt[0].header.seqNumber == 0) {
         int width, height;
-        sscanf(buffer_pkt[i].data, "%d %d", &width, &height);
+        sscanf(buffer_pkt[0].data, "%d %d", &width, &height);
         init_player(width, height);
     }
     if (flush_pid > 0) waitpid(flush_pid, NULL, 0);
@@ -192,7 +192,7 @@ void flush_vid(int index) {
             }
         }
         fflush(fp);
-        exit(0)
+        exit(0);
     }
     return;
 }
