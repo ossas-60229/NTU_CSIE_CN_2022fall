@@ -135,7 +135,6 @@ int main(int argc, char *argv[]) {
         // recv ack
         if (recvfrom(sendersocket, &now_seg, sizeof(SEGMENT), 0,
                      (struct sockaddr *)&agent, &addr_len) > 0) {
-            send_count--;
             if (now_seg.header.fin == 1) {
                 fprintf(stderr, "recv\tfinback\n");
                 break;
@@ -145,6 +144,7 @@ int main(int argc, char *argv[]) {
                 while (ack_sure++ < now_seg.header.ackNumber) {
                     popfront(window_list);
                     ack_count++;
+                    send_count--;
                 }
                 if (ack_count >= winsize) {  // congestion controll
                     if (winsize >= threshold) {
