@@ -140,6 +140,7 @@ int main(int argc, char *argv[]) {
                 break;
             }
             fprintf(stderr, "recv\tack\t#%d\n", now_seg.header.ackNumber);
+            fprintf(stderr, "fucking ack_count %d\n", ack_count);
             if (ack_sure < now_seg.header.ackNumber) {
                 while (ack_sure++ < now_seg.header.ackNumber) {
                     popfront(window_list);
