@@ -152,7 +152,7 @@ int main(int argc, char *argv[]) {
                 ack_count = 0;
                 send_count = 0;
             }
-            start_t = clock();
+            if (ack_sure < now_seg.header.ackNumber) start_t = clock();
         }
         // fail check timeout
         now_t = clock();
