@@ -17,8 +17,8 @@
 #include <zlib.h>
 
 using namespace std;
-#define SEG_SIZE 1000
-#define BUFF_SIZE 256
+#define SEG_SIZE 4096
+#define BUFF_SIZE 1024
 
 #define ERR_EXIT(msg)                 \
     {                                 \

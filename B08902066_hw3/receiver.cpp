@@ -5,6 +5,8 @@ SEGMENT buffer_pkt[BUFF_SIZE];
 static int frame_number = 0, frame_collect = 0, now_width, now_height;
 const char *player_exec = "./openCV";
 const char *fifo_name = "video.fifo";
+int flush_time = 0;
+pid_t flush_pid = -1;
 FILE *fp;
 int init_ed = 0;
 pid_t pid = -1;
@@ -116,6 +118,8 @@ int main(int argc, char *argv[]) {
     }
     if (pid > 0) waitpid(pid, NULL, 0);
     fclose(fp);
+    if (flush_pid > 0) waitpid(flush_pid, NULL, 0);
+    if (pid > 0) waitpid(pid, NULL, 0);
     wait(NULL);
     return 0;
 }
@@ -173,16 +177,22 @@ void init_player(int width, int height) {
 }
 void flush_vid(int index) {
     fprintf(stderr, "flush\n");
-    for (int i = 0; i < index; i++) {
-        if (buffer_pkt[i].header.seqNumber == 0) {
-            int width, height;
-            sscanf(buffer_pkt[i].data, "%d %d", &width, &height);
-            init_player(width, height);
-        } else {
-            fwrite(buffer_pkt[i].data, sizeof(char),
-                   buffer_pkt[i].header.length, fp);
-        }
+    if (buffer_pkt[0].header.seqNumber == 0) {
+        int width, height;
+        sscanf(buffer_pkt[i].data, "%d %d", &width, &height);
+        init_player(width, height);
     }
-    fflush(fp);
+    if (flush_pid > 0) waitpid(flush_pid, NULL, 0);
+    flush_pid = fork();
+    if (flush_pid == 0) {
+        for (int i = 0; i < index; i++) {
+            if (buffer_pkt[i].header.seqNumber != 0) {
+                fwrite(buffer_pkt[i].data, sizeof(char),
+                       buffer_pkt[i].header.length, fp);
+            }
+        }
+        fflush(fp);
+        exit(0)
+    }
     return;
 }
