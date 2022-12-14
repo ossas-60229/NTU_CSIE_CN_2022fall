@@ -100,6 +100,7 @@ int main(int argc, char *argv[]) {
         cap >> tmp_frame;
         seg_collect(window_list, tmp_frame, seq);
     }
+    int timeout = 0;
     while (1) {
         if (window_list.size < winsize * 100 && (!read_final)) {
             // make sure the space complexity is acceptable
