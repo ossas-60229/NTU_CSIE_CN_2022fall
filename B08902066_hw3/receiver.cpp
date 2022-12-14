@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
         if (recvfrom(recvsocket, &now_seg, sizeof(SEGMENT), 0,
                      (struct sockaddr *)&agent, &addr_len) > 0) {
             if (now_seg.header.seqNumber == ack_sure + 1) {  // order check
-                if (now_seg.header.fin && fuck) {            // finback
+                if (now_seg.header.fin) {                    // finback
                     fprintf(stderr, "send\tfinack\n");
                     flush_vid(index);
                     now_seg.header.ack = 1;
