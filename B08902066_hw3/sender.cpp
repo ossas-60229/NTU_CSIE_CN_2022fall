@@ -91,8 +91,8 @@ int main(int argc, char *argv[]) {
     now_seg.header.checksum = get_checksum(now_seg.data);
     empback(window_list, now_seg);
     initSEG(now_seg);
-    int dosend = 0, send_o = -1, wait_now = 0, win_right = 0, win_left = 0,
-        len = 0, seq = 1, ack_sure = -1;
+    int dosend = 0, send_o = -1, wait_now = 0, ack_count = 0, len = 0, seq = 1,
+        ack_sure = -1;
     int64_t start_t = clock(), now_t = clock();
     char *p = NULL, *tmp_buf = (char *)malloc(sizeof(char));
     SEGNODE *node_now = NULL;
@@ -133,40 +133,34 @@ int main(int argc, char *argv[]) {
             node_now = node_now->next;
         }
         // recv ack
-        if (ack_sure != win_right) {  // not end
-            // receive some ack
-            if (recvfrom(sendersocket, &now_seg, sizeof(SEGMENT), 0,
-                         (struct sockaddr *)&agent, &addr_len) > 0) {
-                start_t = clock();
-                if (now_seg.header.fin == 1) {
-                    fprintf(stderr, "recv\tfinback\n");
-                    break;
-                }
-                if (ack_sure < now_seg.header.ackNumber)
-                    ack_sure = now_seg.header.ackNumber;
-
+        if (recvfrom(sendersocket, &now_seg, sizeof(SEGMENT), 0,
+                     (struct sockaddr *)&agent, &addr_len) > 0) {
+            ack_count++;
+            if (now_seg.header.fin == 1) {
+                fprintf(stderr, "recv\tfinback\n");
+                break;
+            }
+            if (ack_sure < now_seg.header.ackNumber) {
                 fprintf(stderr, "recv\tack\t#%d\n", now_seg.header.ackNumber);
-                if (ack_sure >= win_right) {  // congestion controll
+                if (ack_count >= winsize) {  // congestion controll
                     if (winsize >= threshold) {
                         winsize++;
                     } else {
                         winsize *= 2;
                     }
-                    win_left = ack_sure + 1;
-                    win_right = win_left + winsize - 1;
+                    ack_count = 0;
+                }
+                while (ack_sure++ < now_seg.header.ackNumber) {
                     popfront(window_list);
-                } else if (ack_sure >= win_left) {
-                    while (win_left++ <= ack_sure) {
-                        popfront(window_list);
-                    }
                 }
             }
+            start_t = clock();
         }
         // fail check timeout
         now_t = clock();
         if (now_t - start_t >= 1 * CLOCKS_PER_SEC) {
+            ack_count = 0;
             winsize = 1;
-            win_right = win_left;
             threshold = max(winsize / 2, 1);
             fprintf(stderr, "time\tout,\t\tthreshold = %d\n", threshold);
             node_now = NULL;
