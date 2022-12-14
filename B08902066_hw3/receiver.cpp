@@ -188,7 +188,7 @@ void flush_vid(int index) {
         init_player(width, height);
     }
     if (flush_pid > 0) waitpid(flush_pid, NULL, 0);
-    pid_t flush_pid = fork();
+    flush_pid = fork();
     if (flush_pid == 0) {
         for (int i = 0; i < index; i++) {
             if (buffer_pkt[i].header.seqNumber != 0) {
