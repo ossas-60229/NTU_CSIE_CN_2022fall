@@ -157,6 +157,7 @@ void init_player(int width, int height) {
     init_ed = 1;
     signal(SIGPIPE, sighandler);
     mkfifo(fifo_name, 0777);
+    fp = fopen(fifo_name, "w");
     now_width = width;
     now_height = height;
     pid = fork();
@@ -165,8 +166,6 @@ void init_player(int width, int height) {
         sprintf(w, "%d", width);
         sprintf(h, "%d", height);
         execlp(player_exec, player_exec, fifo_name, w, h, NULL);
-    } else {
-        fp = fopen(fifo_name, "w");
     }
     return;
 }
