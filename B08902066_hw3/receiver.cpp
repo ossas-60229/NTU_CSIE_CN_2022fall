@@ -6,6 +6,7 @@ static int frame_number = 0, frame_collect = 0, now_width, now_height;
 const char *player_exec = "./openCV";
 const char *fifo_name = "video.fifo";
 FILE *fp;
+int init_ed = 0;
 pid_t pid = -1;
 void sighandler(int signo) {
     if (signo == SIGPIPE) {
@@ -152,6 +153,8 @@ unsigned long get_checksum(char *str) {
     return checksum;
 }
 void init_player(int width, int height) {
+    if (init_ed > 0) return;
+    init_ed = 1;
     signal(SIGPIPE, sighandler);
     mkfifo(fifo_name, 0777);
     now_width = width;
