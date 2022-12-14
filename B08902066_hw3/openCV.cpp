@@ -40,7 +40,6 @@ int main(int argc, char *argv[]) {
     uchar buffer[imgSize];
 
     while (!feof(fp)) {
-        sleep(1);
         fread(buffer, sizeof(uchar), imgSize, fp);
         // Allocate container to load frames
         // Copy a frame to the buffer

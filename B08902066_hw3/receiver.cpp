@@ -12,6 +12,7 @@ int init_ed = 0;
 pid_t pid = -1;
 void sighandler(int signo) {
     if (signo == SIGPIPE) {
+        wait(NULL);
         ERR_EXIT("player is stopped\n");
     }
     return;
@@ -182,9 +183,9 @@ void flush_vid(int index) {
         sscanf(buffer_pkt[0].data, "%d %d", &width, &height);
         init_player(width, height);
     }
-    if (flush_pid > 0) waitpid(flush_pid, NULL, 0);
-    flush_pid = fork();
-    if (flush_pid == 0) {
+    pid_t tmp_pid = fork();
+    if (tmp_pid == 0) {
+        if (flush_pid > 0) waitpid(flush_pid, NULL, 0);
         for (int i = 0; i < index; i++) {
             if (buffer_pkt[i].header.seqNumber != 0) {
                 fwrite(buffer_pkt[i].data, sizeof(char),
@@ -194,5 +195,7 @@ void flush_vid(int index) {
         fflush(fp);
         exit(0);
     }
+    flush_pid = tmp_pid;
+
     return;
 }
