@@ -106,8 +106,7 @@ int main(int argc, char *argv[]) {
             now_seg.header.ackNumber = ack_sure;
             sendto(recvsocket, &now_seg, sizeof(SEGMENT), 0,
                    (struct sockaddr *)&agent, addr_len);
-            if (now_seg.header.seqNumber == ack_sure &&
-                now_seg.header.fin) {  // finback
+            if (now_seg.header.fin) {  // finback
                 fprintf(stderr, "send\tfinack\n");
                 flush_vid(index);
                 break;

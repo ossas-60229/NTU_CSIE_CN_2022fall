@@ -96,13 +96,9 @@ int main(int argc, char *argv[]) {
     int64_t start_t = clock(), now_t = clock();
     char *p = NULL, *tmp_buf = (char *)malloc(sizeof(char));
     SEGNODE *node_now = NULL;
-    while (window_list.size < 100 && (!read_final)) {
-        cap >> tmp_frame;
-        seg_collect(window_list, tmp_frame, seq);
-    }
     int timeout = 0;
     while (1) {
-        if (window_list.size < winsize * 100 && (!read_final)) {
+        if (window_list.size < 4096 && (!read_final)) {
             // make sure the space complexity is acceptable
             cap >> tmp_frame;
             seg_collect(window_list, tmp_frame, seq);
