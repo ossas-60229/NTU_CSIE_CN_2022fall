@@ -137,13 +137,12 @@ int main(int argc, char *argv[]) {
                      (struct sockaddr *)&agent, &addr_len) > 0) {
             ack_count++;
             ack_sure++;
+            popfront(window_list);
             if (now_seg.header.fin == 1) {
                 fprintf(stderr, "recv\tfinback\n");
                 break;
             }
             fprintf(stderr, "recv\tack\t#%d\n", now_seg.header.ackNumber);
-            fprintf(stderr, "fucking ack_count %d\n", ack_count);
-            popfront(window_list);
             if (ack_count >= winsize) {  // congestion controll
                 if (winsize >= threshold) {
                     winsize++;
