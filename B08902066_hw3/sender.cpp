@@ -135,6 +135,7 @@ int main(int argc, char *argv[]) {
         // recv ack
         if (recvfrom(sendersocket, &now_seg, sizeof(SEGMENT), 0,
                      (struct sockaddr *)&agent, &addr_len) > 0) {
+            send_count--;
             if (now_seg.header.fin == 1) {
                 fprintf(stderr, "recv\tfinback\n");
                 break;
@@ -163,7 +164,7 @@ int main(int argc, char *argv[]) {
             ack_count = 0;
             send_count = 0;
             winsize = 1;
-            threshold = max(winsize / 2, 1);
+            if (ack_sure > 0) threshold = max(winsize / 2, 1);
             fprintf(stderr, "time\tout,\t\tthreshold = %d\n", threshold);
             node_now = NULL;
             wait_now = 0;
