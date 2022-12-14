@@ -282,6 +282,7 @@ void seg_collect(LIST &lit, Mat &tmp_frame, int &seq) {
         SEGMENT *tmp_seg = (SEGMENT *)malloc(sizeof(SEGMENT));
         initSEG(*tmp_seg);
         tmp_seg->header.fin = 1;
+        tmp_seg->header.seqNumber = seq++;
         empback(lit, *tmp_seg);
         read_final = 1;
         return;
