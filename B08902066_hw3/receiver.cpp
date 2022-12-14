@@ -121,8 +121,8 @@ int main(int argc, char *argv[]) {
         }
         initSEG(now_seg);
     }
-    if (pid > 0) waitpid(pid, NULL, 0);
     fclose(fp);
+    if (pid > 0) waitpid(pid, NULL, 0);
     if (flush_pid > 0) waitpid(flush_pid, NULL, 0);
     if (pid > 0) waitpid(pid, NULL, 0);
     wait(NULL);
@@ -187,20 +187,13 @@ void flush_vid(int index) {
         sscanf(buffer_pkt[0].data, "%d %d", &width, &height);
         init_player(width, height);
     }
-    if (flush_pid > 0) waitpid(flush_pid, NULL, 0);
-    flush_pid = fork();
-    if (flush_pid == 0) {
-        for (int i = 0; i < index; i++) {
-            if (buffer_pkt[i].header.seqNumber != 0) {
-                fwrite(buffer_pkt[i].data, sizeof(char),
-                       buffer_pkt[i].header.length, fp);
-            }
+    for (int i = 0; i < index; i++) {
+        if (buffer_pkt[i].header.seqNumber != 0) {
+            fwrite(buffer_pkt[i].data, sizeof(char),
+                   buffer_pkt[i].header.length, fp);
         }
-        fflush(fp);
-        fclose(fp);
-        exit(0);
     }
-    flush_pid = flush_pid;
+    fflush(fp);
 
     return;
 }

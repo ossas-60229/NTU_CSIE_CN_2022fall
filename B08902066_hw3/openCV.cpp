@@ -41,21 +41,11 @@ int main(int argc, char *argv[]) {
 
     while (!feof(fp)) {
         fread(buffer, sizeof(uchar), imgSize, fp);
-        // Allocate container to load frames
-        // Copy a frame to the buffer
-
-        // Here, we assume that the buffer is transmitted from the server to the
-        // client Copy a frame from the buffer to the container of the client
         uchar *iptr = client_img.data;
         memcpy(iptr, buffer, imgSize);
 
-        // show the frame
         imshow("Video", client_img);
 
-        // Press ESC on keyboard to exit
-        // Notice: this part is necessary due to openCV's design.
-        // waitKey function means a delay to get the next frame. You can change
-        // the value of delay to see what will happen
         char c = (char)waitKey(1000);
         if (c == 27) break;
     }
