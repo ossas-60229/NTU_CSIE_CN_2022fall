@@ -135,24 +135,26 @@ int main(int argc, char *argv[]) {
         // recv ack
         if (recvfrom(sendersocket, &now_seg, sizeof(SEGMENT), 0,
                      (struct sockaddr *)&agent, &addr_len) > 0) {
-            ack_count++;
-            ack_sure++;
-            popfront(window_list);
             if (now_seg.header.fin == 1) {
                 fprintf(stderr, "recv\tfinback\n");
                 break;
             }
             fprintf(stderr, "recv\tack\t#%d\n", now_seg.header.ackNumber);
-            if (ack_count >= winsize) {  // congestion controll
-                if (winsize >= threshold) {
-                    winsize++;
-                } else {
-                    winsize *= 2;
+            if (ack_sure < now_seg.header.ackNumber) {
+                popfront(window_list);
+                ack_count++;
+                ack_sure++;
+                if (ack_count >= winsize) {  // congestion controll
+                    if (winsize >= threshold) {
+                        winsize++;
+                    } else {
+                        winsize *= 2;
+                    }
+                    ack_count = 0;
+                    send_count = 0;
                 }
-                ack_count = 0;
-                send_count = 0;
+                start_t = clock();
             }
-            if (ack_sure < now_seg.header.ackNumber) start_t = clock();
         }
         // fail check timeout
         now_t = clock();
