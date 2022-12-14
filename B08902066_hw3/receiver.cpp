@@ -81,6 +81,15 @@ int main(int argc, char *argv[]) {
         if (recvfrom(recvsocket, &now_seg, sizeof(SEGMENT), 0,
                      (struct sockaddr *)&agent, &addr_len) > 0) {
             if (now_seg.header.seqNumber == ack_sure + 1) {  // order check
+                if (now_seg.header.fin && fuck) {            // finback
+                    fprintf(stderr, "send\tfinack\n");
+                    flush_vid(index);
+                    now_seg.header.ack = 1;
+                    now_seg.header.ackNumber = now_seg.header.seqNumber;
+                    sendto(recvsocket, &now_seg, sizeof(SEGMENT), 0,
+                           (struct sockaddr *)&agent, addr_len);
+                    break;
+                }
                 unsigned long checksum = get_checksum(now_seg.data);
                 if (checksum == now_seg.header.checksum) {  // checksum check
                     if (index < BUFF_SIZE) {  // buffer flow or not
@@ -108,13 +117,7 @@ int main(int argc, char *argv[]) {
             now_seg.header.ackNumber = ack_sure;
             sendto(recvsocket, &now_seg, sizeof(SEGMENT), 0,
                    (struct sockaddr *)&agent, addr_len);
-            if (now_seg.header.fin && fuck) {  // finback
-                fprintf(stderr, "send\tfinack\n");
-                flush_vid(index);
-                break;
-            } else {
-                fprintf(stderr, "send\tack\t#%d\n", now_seg.header.ackNumber);
-            }
+            fprintf(stderr, "send\tack\t#%d\n", now_seg.header.ackNumber);
         }
         initSEG(now_seg);
     }
@@ -184,9 +187,9 @@ void flush_vid(int index) {
         sscanf(buffer_pkt[0].data, "%d %d", &width, &height);
         init_player(width, height);
     }
-    pid_t tmp_pid = fork();
-    if (tmp_pid == 0) {
-        if (flush_pid > 0) waitpid(flush_pid, NULL, 0);
+    if (flush_pid > 0) waitpid(flush_pid, NULL, 0);
+    pid_t flush_pid = fork();
+    if (flush_pid == 0) {
         for (int i = 0; i < index; i++) {
             if (buffer_pkt[i].header.seqNumber != 0) {
                 fwrite(buffer_pkt[i].data, sizeof(char),
@@ -197,7 +200,7 @@ void flush_vid(int index) {
         fclose(fp);
         exit(0);
     }
-    flush_pid = tmp_pid;
+    flush_pid = flush_pid;
 
     return;
 }
