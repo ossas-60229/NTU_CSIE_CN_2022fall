@@ -5,6 +5,7 @@
 #include <sys/select.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 #include <iostream>
 
@@ -17,7 +18,6 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "argument error");
         exit(0);
     }
-    int fd = open(argv[1], O_RDONLY);
     FILE *fp = fopen(argv[1], "r");
 
     // Get the resolution of the video
@@ -40,6 +40,7 @@ int main(int argc, char *argv[]) {
     uchar buffer[imgSize];
 
     while (!feof(fp)) {
+        sleep(1);
         fread(buffer, sizeof(uchar), imgSize, fp);
         // Allocate container to load frames
         // Copy a frame to the buffer

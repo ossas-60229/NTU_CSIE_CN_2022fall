@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
     char *p = NULL, *tmp_buf = (char *)malloc(sizeof(char));
     SEGNODE *node_now = NULL;
     while (1) {
-        if (window_list.size < winsize * 10 && (!read_final)) {
+        if (window_list.size < winsize * 100 && (!read_final)) {
             // make sure the space complexity is acceptable
             cap >> tmp_frame;
             seg_collect(window_list, tmp_frame, seq);
@@ -146,7 +146,7 @@ int main(int argc, char *argv[]) {
                     ack_sure = now_seg.header.ackNumber;
 
                 fprintf(stderr, "recv\tack\t#%d\n", now_seg.header.ackNumber);
-                if (ack_sure == win_right) {  // congestion controll
+                if (ack_sure >= win_right) {  // congestion controll
                     if (winsize >= threshold) {
                         winsize++;
                     } else {
@@ -155,8 +155,10 @@ int main(int argc, char *argv[]) {
                     win_left = ack_sure + 1;
                     win_right = win_left + winsize - 1;
                     popfront(window_list);
-                } else if (ack_sure == win_left) {
-                    popfront(window_list);
+                } else if (ack_sure >= win_left) {
+                    while (win_left++ <= ack_sure) {
+                        popfront(window_list);
+                    }
                 }
             }
         }
