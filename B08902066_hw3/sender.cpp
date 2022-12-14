@@ -144,7 +144,6 @@ int main(int argc, char *argv[]) {
                 while (ack_sure++ < now_seg.header.ackNumber) {
                     popfront(window_list);
                     ack_count++;
-                    send_count--;
                 }
                 if (ack_count >= winsize) {  // congestion controll
                     if (winsize >= threshold) {
@@ -168,7 +167,6 @@ int main(int argc, char *argv[]) {
             fprintf(stderr, "time\tout,\t\tthreshold = %d\n", threshold);
             node_now = NULL;
             wait_now = 0;
-            start_t = clock();
         }
         initSEG(now_seg);
     }
@@ -264,6 +262,7 @@ void popfront(LIST &lit) {
     if (lit.head == NULL) return;
     SEGNODE *node = lit.head->next;
     free(lit.head);
+    lit.head = NULL;
     if (node != NULL) {
         node->prev = NULL;
     } else {
