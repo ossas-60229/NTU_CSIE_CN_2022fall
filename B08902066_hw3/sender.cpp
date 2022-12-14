@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
     int64_t start_t = clock(), now_t = clock();
     char *p = NULL, *tmp_buf = (char *)malloc(sizeof(char));
     SEGNODE *node_now = NULL;
-    while (window_list.size < 1000 && (!read_final)) {
+    while (window_list.size < 100 && (!read_final)) {
         cap >> tmp_frame;
         seg_collect(window_list, tmp_frame, seq);
     }
@@ -151,9 +151,8 @@ int main(int argc, char *argv[]) {
                     ack_count = 0;
                     send_count = 0;
                 }
-                while (ack_sure++ < now_seg.header.ackNumber) {
+                while (ack_sure++ < now_seg.header.ackNumber)
                     popfront(window_list);
-                }
             }
             start_t = clock();
         }
@@ -166,6 +165,7 @@ int main(int argc, char *argv[]) {
             threshold = max(winsize / 2, 1);
             fprintf(stderr, "time\tout,\t\tthreshold = %d\n", threshold);
             node_now = NULL;
+            wait_now = 0;
             start_t = clock();
         }
         initSEG(now_seg);
