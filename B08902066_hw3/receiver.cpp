@@ -194,6 +194,7 @@ void flush_vid(int index) {
             }
         }
         fflush(fp);
+        fclose(fp);
         exit(0);
     }
     flush_pid = tmp_pid;
