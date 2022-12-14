@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
     empback(window_list, now_seg);
     initSEG(now_seg);
     int dosend = 0, send_o = -1, wait_now = 0, ack_count = 0, len = 0, seq = 1,
-        ack_sure = -1;
+        send_count = 0, ack_sure = -1;
     int64_t start_t = clock(), now_t = clock();
     char *p = NULL, *tmp_buf = (char *)malloc(sizeof(char));
     SEGNODE *node_now = NULL;
@@ -103,8 +103,7 @@ int main(int argc, char *argv[]) {
             seg_collect(window_list, tmp_frame, seq);
         }
         if (node_now == NULL) node_now = window_list.head;
-        dosend = 1;
-        if (dosend) {
+        if (send_count++ < winsize) {
             // send pkt
             now_seg = node_now->seg;
             sendto(sendersocket, &now_seg, sizeof(SEGMENT), 0,
@@ -145,6 +144,7 @@ int main(int argc, char *argv[]) {
                         winsize *= 2;
                     }
                     ack_count = 0;
+                    send_count = 0;
                 }
                 while (ack_sure++ < now_seg.header.ackNumber) {
                     popfront(window_list);
@@ -156,6 +156,7 @@ int main(int argc, char *argv[]) {
         now_t = clock();
         if (now_t - start_t >= 1 * CLOCKS_PER_SEC) {
             ack_count = 0;
+            send_count = 0;
             winsize = 1;
             threshold = max(winsize / 2, 1);
             fprintf(stderr, "time\tout,\t\tthreshold = %d\n", threshold);
